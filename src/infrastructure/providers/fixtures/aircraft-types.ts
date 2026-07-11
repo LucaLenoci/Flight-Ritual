@@ -8,10 +8,12 @@ export interface AircraftTypeSeed {
 }
 
 /**
- * Curated seed for the AircraftType catalog (model/type, never a tail
- * number). No equally convenient free bulk open dataset of aircraft
- * types-with-ICAO-codes exists (unlike Airport/Airline), so this list is
- * hand-curated and deliberately expandable — add entries here as needed.
+ * Curated overrides for a handful of common aircraft types (model/type,
+ * never a tail number): real cruise speeds and fun facts. The full
+ * AircraftType catalog is bulk-seeded from OpenFlights' planes.dat (see
+ * infrastructure/seed/seed-reference-data.ts), which has no facts or speed
+ * data of its own — these entries are layered on top by ICAO code and take
+ * priority over the bulk-derived defaults. Expand this list as needed.
  */
 export const AIRCRAFT_TYPES: AircraftTypeSeed[] = [
   {

@@ -57,14 +57,21 @@ under concurrent unlock attempts.
 
 ## Open-data strategy
 
-No paid APIs. The reference catalog (airports, airlines) is bulk-seeded from free, open datasets:
+No paid APIs. The full reference catalog — airports, airlines, and aircraft types — is bulk-seeded from free, open
+datasets, not a curated subset:
 
-- **Airports** — [OurAirports](https://github.com/davidmegginson/ourairports-data), filtered to entries with an
-  IATA code and scheduled commercial service.
-- **Airlines** — [OpenFlights](https://github.com/jpatokal/openflights), filtered to active carriers with a valid
-  IATA and ICAO code.
-- **Aircraft types** — no equally convenient free bulk dataset exists for this entity, so it's a curated,
-  expandable fixture list (`infrastructure/providers/fixtures/aircraft-types.ts`).
+- **Airports** (~7,700) — [OurAirports](https://github.com/davidmegginson/ourairports-data), every entry with a
+  valid IATA and ICAO code.
+- **Airlines** (~930) — [OpenFlights](https://github.com/jpatokal/openflights) `airlines.dat`, every carrier
+  (active or historical) with a valid IATA and ICAO code.
+- **Aircraft types** (~230) — OpenFlights `planes.dat`, every type with a valid ICAO type code. This dataset has
+  no facts or cruise-speed figures, so a small curated list
+  (`infrastructure/providers/fixtures/aircraft-types.ts`) layers real facts/speeds on top of the common types by
+  ICAO code; every other type still gets a real manufacturer/model name, just without the flavor text.
+
+Seeding is idempotent (every row is an upsert) and tolerant of upstream data-quality conflicts — a handful of rows
+across ~8,800 total can share a secondary code (e.g. two historical airlines with the same ICAO designator); those
+are skipped and logged rather than aborting the run.
 
 Run the seed once before using the app for real data (not run automatically at install time, since it makes
 network calls to third-party hosts):
