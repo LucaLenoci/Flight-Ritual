@@ -32,11 +32,13 @@ src/
 ## Running locally
 
 ```bash
-npm install
-cp .env.example .env   # then set a real DEV_SESSION_SECRET (32+ random bytes)
+npm install             # also runs `prisma generate` via postinstall
+cp .env.example .env    # then set a real DEV_SESSION_SECRET (32+ random bytes)
 npx prisma migrate deploy
 npm run dev
 ```
+
+If you ever see `@prisma/client did not initialize yet`, run `npx prisma generate` and restart the dev server — some npm configurations (e.g. `--ignore-scripts`) skip the `postinstall` hook.
 
 ## Testing
 
