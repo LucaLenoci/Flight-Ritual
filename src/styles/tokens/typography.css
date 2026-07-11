@@ -1,0 +1,27 @@
+/**
+ * Aloft typography tokens. Font families (Instrument Serif / Plus Jakarta
+ * Sans / JetBrains Mono) and the numeric type scale below follow the
+ * attached Aloft design system. Fonts are self-hosted via next/font/google
+ * (see app/layout.tsx) rather than the design system's CDN @import, so the
+ * --next-font-* variables it injects are the actual source of these families.
+ */
+
+:root {
+  --font-display: var(--next-font-display), "Iowan Old Style", serif;
+  --font-body: var(--next-font-body), system-ui, sans-serif;
+  --font-mono: var(--next-font-mono), ui-monospace, monospace;
+
+  /* Type scale */
+  --text-xs: 0.75rem; /* 12px — eyebrow labels, footer stats */
+  --text-sm: 0.875rem; /* 14px — body/support copy */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.375rem; /* 22px */
+  --text-2xl: 1.75rem; /* 28px */
+  --text-3xl: 2.25rem; /* 36px — moment headlines */
+  --text-4xl: 3rem; /* 48px — hero headlines */
+
+  --tracking-eyebrow: 0.08em;
+  --leading-tight: 1.15;
+  --leading-normal: 1.5;
+}

@@ -1,0 +1,68 @@
+/**
+ * Aloft effects tokens: shadows, rarity glows, and motion — values sourced
+ * from the attached Aloft design system, kept under the original
+ * Tailwind-facing variable names so components didn't need rewriting.
+ */
+
+:root {
+  /* Shadows: warm-tinted (never pure black), soft, layered — a tight
+     low-opacity shadow plus a broader diffuse one. */
+  --shadow-card-tight: 0 2px 6px oklch(25% 0.04 258 / 0.08);
+  --shadow-card-diffuse: 0 10px 30px oklch(25% 0.04 258 / 0.14);
+  --shadow-card: var(--shadow-card-tight), var(--shadow-card-diffuse);
+
+  --shadow-ui-tight: 0 1px 2px oklch(20% 0.02 260 / 0.06);
+  --shadow-ui-diffuse: 0 8px 24px oklch(20% 0.03 260 / 0.12);
+  --shadow-ui: var(--shadow-ui-tight), var(--shadow-ui-diffuse);
+
+  /* Rarity glow — layered on top of the base card shadow, never replacing it */
+  --glow-uncommon: 0 0 0 1px oklch(62% 0.16 230 / 0.35), 0 0 28px oklch(62% 0.16 230 / 0.35);
+  --glow-rare: 0 0 0 1px oklch(58% 0.2 305 / 0.4), 0 0 32px oklch(58% 0.2 305 / 0.45);
+  --glow-legendary: 0 0 0 1.5px oklch(69% 0.16 80 / 0.55), 0 0 40px oklch(69% 0.16 80 / 0.55);
+
+  /* Motion */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --duration-ui: 180ms;
+  --duration-ui-max: 280ms;
+  --duration-enter: 480ms;
+  --duration-reveal: 900ms;
+  --duration-foil-sweep: 3s;
+}
+
+@keyframes card-pop-in {
+  0% {
+    transform: scale(0.72) rotateY(-8deg) translateY(24px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.04) rotateY(2deg) translateY(-4px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotateY(0deg) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rise-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes foil-sweep {
+  0% {
+    background-position: -140% 0;
+  }
+  100% {
+    background-position: 240% 0;
+  }
+}

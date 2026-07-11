@@ -1,0 +1,159 @@
+// Persistence layer schema. Mirrors the domain model in src/domain but stays
+// a plain data shape — mapping to/from rich domain entities happens in
+// src/infrastructure/persistence repositories, never in application code.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String             @id @default(cuid())
+  createdAt     DateTime           @default(now())
+  loggedFlights LoggedFlight[]
+  airportCards  UserAirportCard[]
+  aircraftCards UserAircraftCard[]
+  airlineCards  UserAirlineCard[]
+}
+
+// Reference data: airports a user can log a flight through. Seeded in bulk
+// from the open OurAirports dataset (see infrastructure/seed) — continent is
+// carried directly from that source to support "continents reached" stats.
+model Airport {
+  iataCode  String  @id
+  icaoCode  String  @unique
+  name      String
+  city      String
+  country   String
+  continent String?
+  latitude  Float
+  longitude Float
+  timeZone  String
+
+  originFlights      LoggedFlight[]    @relation("OriginAirport")
+  destinationFlights LoggedFlight[]    @relation("DestinationAirport")
+  userCards          UserAirportCard[]
+}
+
+// Reference data: airlines a user can log a flight on. Seeded in bulk from
+// the open OpenFlights dataset.
+model Airline {
+  iataCode      String            @id
+  icaoCode      String            @unique
+  name          String
+  loggedFlights LoggedFlight[]
+  userCards     UserAirlineCard[]
+}
+
+// Reference data: aircraft *models*, not tail-numbered instances — this is
+// deliberate, since Collectible Cards unlock per model/type, never per
+// registration. No equally convenient free bulk dataset exists for this
+// entity (unlike Airport/Airline), so this stays a curated, expandable seed
+// list (see infrastructure/providers/fixtures/aircraft-types.ts).
+model AircraftType {
+  icaoTypeCode   String             @id
+  manufacturer   String
+  model          String
+  facts          String // JSON-encoded string[] of interesting facts
+  cruiseSpeedKmh Int?
+  loggedFlights LoggedFlight[]
+  userCards     UserAircraftCard[]
+}
+
+// A user's own record of a flight they took: flight number + date, entered
+// by the user, then enriched where possible (airline, deterministically
+// resolved from the flight-number prefix) and otherwise supplied manually
+// (route, aircraft type — no reliable free open-data source exists for
+// "flight number + past date -> route + aircraft type"). `*Source` columns
+// record provenance per field so manual corrections are explicit and
+// traceable rather than silently indistinguishable from enriched data.
+model LoggedFlight {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  flightNumber  String
+  flightDateUtc DateTime
+
+  airlineIataCode String
+  airline         Airline @relation(fields: [airlineIataCode], references: [iataCode])
+  airlineSource   String  @default("USER_PROVIDED")
+
+  originIataCode String
+  origin         Airport @relation("OriginAirport", fields: [originIataCode], references: [iataCode])
+  originSource   String  @default("USER_PROVIDED")
+
+  destinationIataCode String
+  destination         Airport @relation("DestinationAirport", fields: [destinationIataCode], references: [iataCode])
+  destinationSource   String  @default("USER_PROVIDED")
+
+  aircraftTypeCode   String?
+  aircraftType       AircraftType? @relation(fields: [aircraftTypeCode], references: [icaoTypeCode])
+  aircraftTypeSource String        @default("USER_PROVIDED")
+
+  tailNumber String? // flavor only — never used for card unlock
+  note       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  airportCardsUnlocked  UserAirportCard[]
+  aircraftCardsUnlocked UserAircraftCard[]
+  airlineCardsUnlocked  UserAirlineCard[]
+
+  @@index([userId])
+  @@index([userId, flightDateUtc])
+}
+
+// Collectible Cards ownership. Each of these three junction tables is the
+// database-level source of truth for "does this user already own this
+// card" — the @@unique constraint is what guarantees no duplicate can ever
+// be created, even under concurrent unlock attempts for the same user and
+// entity (a safe create-and-catch-conflict upsert relies on this, not on
+// an application-level check, which could race). The reference entities
+// (Airport/AircraftType/Airline) are shared, not duplicated per user; only
+// firstCollectedAtUtc and the triggering flight are per-user state here.
+model UserAirportCard {
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id])
+  airportIataCode      String
+  airport              Airport       @relation(fields: [airportIataCode], references: [iataCode])
+  firstCollectedAtUtc  DateTime      @default(now())
+  sourceLoggedFlightId String?
+  sourceLoggedFlight   LoggedFlight? @relation(fields: [sourceLoggedFlightId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, airportIataCode])
+  @@index([userId])
+}
+
+model UserAircraftCard {
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id])
+  aircraftTypeCode     String
+  aircraftType         AircraftType  @relation(fields: [aircraftTypeCode], references: [icaoTypeCode])
+  firstCollectedAtUtc  DateTime      @default(now())
+  sourceLoggedFlightId String?
+  sourceLoggedFlight   LoggedFlight? @relation(fields: [sourceLoggedFlightId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, aircraftTypeCode])
+  @@index([userId])
+}
+
+model UserAirlineCard {
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id])
+  airlineIataCode      String
+  airline              Airline       @relation(fields: [airlineIataCode], references: [iataCode])
+  firstCollectedAtUtc  DateTime      @default(now())
+  sourceLoggedFlightId String?
+  sourceLoggedFlight   LoggedFlight? @relation(fields: [sourceLoggedFlightId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, airlineIataCode])
+  @@index([userId])
+}
