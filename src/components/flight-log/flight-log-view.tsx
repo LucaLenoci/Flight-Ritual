@@ -66,7 +66,7 @@ export function FlightLogView() {
           <div className="absolute bottom-5 left-[9px] top-1 w-px bg-border" aria-hidden="true" />
           <div className="flex flex-col gap-4">
             {flights.map((flight) => (
-              <div key={flight.id} className="relative flex gap-4">
+              <div key={flight.id} id={flight.id} className="relative flex scroll-mt-24 gap-4">
                 <div
                   className={`z-10 mt-1.5 h-[18px] w-[18px] shrink-0 rounded-pill ${
                     flight.unlocks && flight.unlocks.length > 0 ? "bg-sky-500 ring-4 ring-sky-500/20" : "bg-border"

@@ -5,5 +5,6 @@ export class AircraftType {
     readonly manufacturer: string,
     readonly model: string,
     readonly facts: readonly string[],
+    readonly cruiseSpeedKmh: number | null = null,
   ) {}
 }

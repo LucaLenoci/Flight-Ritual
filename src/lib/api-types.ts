@@ -27,6 +27,7 @@ export interface AircraftTypeDto {
   manufacturer: string;
   model: string;
   facts: string[];
+  cruiseSpeedKmh: number | null;
 }
 
 export interface LoggedFlightProvenanceDto {
@@ -110,7 +111,14 @@ export interface StatsSnapshotDto {
   longestFlight: { flightNumber: string; distanceKm: number } | null;
   firstLoggedFlight: LoggedFlightRefDto | null;
   latestLoggedFlight: LoggedFlightRefDto | null;
-  mostFrequentRoute: { routeKey: string; flightCount: number } | null;
+  mostFrequentRoute: RouteFrequencyDto | null;
+  topRoutes: RouteFrequencyDto[];
+}
+
+export interface RouteFrequencyDto {
+  routeKey: string;
+  flightCount: number;
+  percentage: number;
 }
 
 export interface AirportCardDto {
@@ -118,6 +126,7 @@ export interface AirportCardDto {
   icaoCode: string;
   city: string;
   country: string;
+  funFact: string;
   rarity: CardRarityDto;
 }
 
@@ -126,6 +135,7 @@ export interface AircraftCardDto {
   manufacturer: string;
   model: string;
   engineType: string;
+  cruiseSpeedKmh: number | null;
   funFact: string;
   rarity: CardRarityDto;
 }
@@ -144,6 +154,8 @@ export interface AlbumEntryDto<TCard> {
   card: TCard;
   owned: boolean;
   firstCollectedAtUtc: string | null;
+  timesFlown: number;
+  sourceLoggedFlightId: string | null;
 }
 
 export interface CardAlbumResponse {
@@ -156,4 +168,45 @@ export interface CardUnlockResultDto {
   newAirportCards: AirportCardDto[];
   newAircraftCards: AircraftCardDto[];
   newAirlineCards: AirlineCardDto[];
+}
+
+export interface CuriosityFactDto {
+  kind: "AIRPORT" | "AIRCRAFT" | "AIRLINE";
+  title: string;
+  body: string;
+}
+
+export interface NextMilestoneDto {
+  name: string;
+  countryThreshold: number;
+  countriesRemaining: number;
+}
+
+export interface UserCuriositiesDto {
+  countryCount: number;
+  nextMilestone: NextMilestoneDto | null;
+  facts: CuriosityFactDto[];
+}
+
+export interface BulkSaveRowInput {
+  flightNumber: string;
+  flightDate: string;
+  originIataCode: string;
+  destinationIataCode: string;
+  airlineIataCode: string;
+  aircraftTypeIcaoCode: string | null;
+  tailNumber: string | null;
+  note: string | null;
+}
+
+export interface BulkSaveRowResultDto {
+  index: number;
+  success: boolean;
+  flight: LoggedFlightDto | null;
+  cardUnlocks: CardUnlockResultDto | null;
+  error: string | null;
+}
+
+export interface BulkSaveResponse {
+  results: BulkSaveRowResultDto[];
 }

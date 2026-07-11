@@ -126,6 +126,27 @@ export function StatsView() {
           />
         )}
       </div>
+
+      {stats.topRoutes.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-display text-xl italic text-text-primary">Most frequent routes</h2>
+          <div className="mt-4 space-y-3 rounded-2xl border border-border bg-surface p-4">
+            {stats.topRoutes.map((route) => (
+              <div key={route.routeKey}>
+                <div className="flex items-baseline justify-between text-sm">
+                  <span className="font-mono text-text-primary">{route.routeKey}</span>
+                  <span className="text-xs text-text-secondary">
+                    {pluralize(route.flightCount, "flight")} · {route.percentage}%
+                  </span>
+                </div>
+                <div className="mt-1.5 h-2 overflow-hidden rounded-pill bg-paper-100 dark:bg-surface-raised">
+                  <div className="h-full rounded-pill bg-sky-500" style={{ width: `${route.percentage}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

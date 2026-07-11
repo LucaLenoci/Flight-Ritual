@@ -33,6 +33,26 @@ export function getAirportCardRarity(iataCode: string): CardRarity {
   return AIRPORT_RARITY[iataCode] ?? CardRarity.COMMON;
 }
 
+// Curated, verified trivia for a handful of well-known airports. No free
+// curated dataset of per-airport trivia exists for the full bulk-seeded
+// catalog (thousands of airports), so this stays a small, honest,
+// expandable list rather than fabricated filler — airports outside it fall
+// back to a plain, data-derived (never invented) observation.
+const AIRPORT_FUN_FACTS: Record<string, string> = {
+  KEF: "Keflavík sits on a lava field — Iceland's main airport was built by the US military in WWII.",
+  LHR: "Heathrow is the busiest airport in Europe by passenger traffic, despite having only two runways.",
+  HND: "Haneda's international terminal was built on reclaimed land in Tokyo Bay.",
+  DXB: "Dubai International has no dedicated cargo-only runway, yet is one of the world's busiest cargo hubs.",
+  JFK: "JFK's original 1948 name was New York International Airport, renamed after President Kennedy in 1963.",
+  SIN: "Singapore Changi has its own butterfly garden and a rooftop swimming pool inside the terminal.",
+  LAX: "LAX's iconic Theme Building was designed to look like a flying saucer for the Space Age.",
+  SFO: "San Francisco International is built on a peninsula and is gradually sinking due to landfill settlement.",
+};
+
+export function getAirportFunFact(iataCode: string, city: string, country: string): string {
+  return AIRPORT_FUN_FACTS[iataCode] ?? `${city} sits in ${country} — fly here again to add more to its story.`;
+}
+
 interface AircraftCardMeta {
   rarity: CardRarity;
   engineType: string;

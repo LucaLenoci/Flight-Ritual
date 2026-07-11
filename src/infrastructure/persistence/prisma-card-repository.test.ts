@@ -20,7 +20,9 @@ describe("PrismaCardRepository (DB race safety)", () => {
 
   beforeEach(async () => {
     userId = randomUUID();
-    airportIataCode = "T" + randomUUID().slice(0, 2).toUpperCase();
+    // "T" + 2 digits is guaranteed not to collide with any real (bulk-seeded) airport code:
+    // real IATA airport codes are always letters-only, never containing a digit.
+    airportIataCode = "T" + String(Math.floor(Math.random() * 100)).padStart(2, "0");
 
     await prisma.user.create({ data: { id: userId } });
     await prisma.airport.create({

@@ -36,7 +36,13 @@ export function toDomainAirline(row: PrismaAirline): Airline {
 }
 
 export function toDomainAircraftType(row: PrismaAircraftType): AircraftType {
-  return new AircraftType(row.icaoTypeCode, row.manufacturer, row.model, JSON.parse(row.facts) as string[]);
+  return new AircraftType(
+    row.icaoTypeCode,
+    row.manufacturer,
+    row.model,
+    JSON.parse(row.facts) as string[],
+    row.cruiseSpeedKmh,
+  );
 }
 
 export type PrismaLoggedFlightWithRelations = PrismaLoggedFlight & {

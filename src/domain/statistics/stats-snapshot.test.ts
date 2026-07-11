@@ -104,6 +104,12 @@ describe("computeStatsSnapshot", () => {
     expect(snapshot.mostFrequentRoute?.routeKey).toBe("BRI-MXP");
     expect(snapshot.mostFrequentRoute?.flightCount).toBe(2);
 
+    // topRoutes ranks both routes descending, with each flight's share of the total.
+    expect(snapshot.topRoutes).toEqual([
+      { routeKey: "BRI-MXP", flightCount: 2, percentage: 67 },
+      { routeKey: "MXP-JFK", flightCount: 1, percentage: 33 },
+    ]);
+
     // MXP-JFK (great-circle ~6800km) is longer than BRI-MXP (~600km).
     expect(snapshot.longestFlight?.flightNumber).toBe("DL200");
 

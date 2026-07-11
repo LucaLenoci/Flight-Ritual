@@ -248,11 +248,13 @@ async function seedAircraftTypes(db: PrismaClient): Promise<number> {
         manufacturer: type.manufacturer,
         model: type.model,
         facts: JSON.stringify(type.facts),
+        cruiseSpeedKmh: type.cruiseSpeedKmh,
       },
       update: {
         manufacturer: type.manufacturer,
         model: type.model,
         facts: JSON.stringify(type.facts),
+        cruiseSpeedKmh: type.cruiseSpeedKmh,
       },
     });
   }

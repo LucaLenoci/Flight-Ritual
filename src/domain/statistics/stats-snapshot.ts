@@ -4,6 +4,8 @@ import { buildUserCollection } from "./user-collection";
 export interface RouteFrequency {
   routeKey: string;
   flightCount: number;
+  /** Share of total flights this route represents, 0-100, rounded to the nearest whole percent. */
+  percentage: number;
 }
 
 export interface RankedAirline {
@@ -44,6 +46,8 @@ export interface StatsSnapshot {
   firstLoggedFlight: LoggedFlightRef | null;
   latestLoggedFlight: LoggedFlightRef | null;
   mostFrequentRoute: RouteFrequency | null;
+  /** Top 5 routes by flight count, descending — powers the route bar chart. */
+  topRoutes: RouteFrequency[];
 }
 
 const EMPTY_SNAPSHOT: StatsSnapshot = {
@@ -61,7 +65,10 @@ const EMPTY_SNAPSHOT: StatsSnapshot = {
   firstLoggedFlight: null,
   latestLoggedFlight: null,
   mostFrequentRoute: null,
+  topRoutes: [],
 };
+
+const TOP_ROUTES_LIMIT = 5;
 
 function topEntry<T extends { flightCount: number } | { visitCount: number }>(
   counts: Map<string, T>,
@@ -139,12 +146,15 @@ export function computeStatsSnapshot(flights: readonly LoggedFlight[]): StatsSna
     }
   }
 
-  let mostFrequentRoute: RouteFrequency | null = null;
-  for (const [routeKey, flightCount] of routeCounts) {
-    if (!mostFrequentRoute || flightCount > mostFrequentRoute.flightCount) {
-      mostFrequentRoute = { routeKey, flightCount };
-    }
-  }
+  const topRoutes = Array.from(routeCounts.entries())
+    .map(([routeKey, flightCount]) => ({
+      routeKey,
+      flightCount,
+      percentage: Math.round((flightCount / flights.length) * 100),
+    }))
+    .sort((a, b) => b.flightCount - a.flightCount)
+    .slice(0, TOP_ROUTES_LIMIT);
+  const mostFrequentRoute = topRoutes[0] ?? null;
 
   return {
     totalFlights: flights.length,
@@ -161,5 +171,6 @@ export function computeStatsSnapshot(flights: readonly LoggedFlight[]): StatsSna
     firstLoggedFlight,
     latestLoggedFlight,
     mostFrequentRoute,
+    topRoutes,
   };
 }

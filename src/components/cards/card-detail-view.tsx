@@ -67,10 +67,13 @@ export function CardDetailView({ kind, code }: { kind: string; code: string }) {
                   { label: "IATA", value: entry.card.iataCode },
                   { label: "ICAO", value: entry.card.icaoCode },
                   { label: "Country", value: entry.card.country },
+                  { label: "Times flown", value: String(entry.timesFlown) },
                 ]}
+                funFact={entry.card.funFact}
                 firstCollectedLabel={
                   entry.firstCollectedAtUtc ? `Collected ${formatShortDate(entry.firstCollectedAtUtc)}` : null
                 }
+                flightLogHref={entry.sourceLoggedFlightId ? `/flight-log#${entry.sourceLoggedFlightId}` : null}
               />
             }
           />
@@ -98,11 +101,17 @@ export function CardDetailView({ kind, code }: { kind: string; code: string }) {
                   { label: "Manufacturer", value: entry.card.manufacturer },
                   { label: "Model", value: entry.card.icaoTypeCode },
                   { label: "Engine", value: entry.card.engineType },
+                  {
+                    label: "Cruise speed",
+                    value: entry.card.cruiseSpeedKmh ? `${entry.card.cruiseSpeedKmh} km/h` : "Unknown",
+                  },
+                  { label: "Times flown", value: String(entry.timesFlown) },
                 ]}
                 funFact={entry.card.funFact}
                 firstCollectedLabel={
                   entry.firstCollectedAtUtc ? `Collected ${formatShortDate(entry.firstCollectedAtUtc)}` : null
                 }
+                flightLogHref={entry.sourceLoggedFlightId ? `/flight-log#${entry.sourceLoggedFlightId}` : null}
               />
             }
           />
@@ -129,11 +138,13 @@ export function CardDetailView({ kind, code }: { kind: string; code: string }) {
                 { label: "IATA", value: entry.card.iataCode },
                 { label: "ICAO", value: entry.card.icaoDesignator },
                 { label: "Country", value: entry.card.country },
+                { label: "Times flown", value: String(entry.timesFlown) },
               ]}
               funFact={entry.card.funFact}
               firstCollectedLabel={
                 entry.firstCollectedAtUtc ? `Collected ${formatShortDate(entry.firstCollectedAtUtc)}` : null
               }
+              flightLogHref={entry.sourceLoggedFlightId ? `/flight-log#${entry.sourceLoggedFlightId}` : null}
             />
           }
         />

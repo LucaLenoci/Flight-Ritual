@@ -55,10 +55,11 @@ model Airline {
 // entity (unlike Airport/Airline), so this stays a curated, expandable seed
 // list (see infrastructure/providers/fixtures/aircraft-types.ts).
 model AircraftType {
-  icaoTypeCode  String             @id
-  manufacturer  String
-  model         String
-  facts         String // JSON-encoded string[] of interesting facts
+  icaoTypeCode   String             @id
+  manufacturer   String
+  model          String
+  facts          String // JSON-encoded string[] of interesting facts
+  cruiseSpeedKmh Int?
   loggedFlights LoggedFlight[]
   userCards     UserAircraftCard[]
 }

@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: "/flight-log", label: "Flight Log" },
   { href: "/collection", label: "Collection" },
   { href: "/stats", label: "Stats" },
+  { href: "/curiosities", label: "Curiosities" },
 ];
 
 export function AppHeader() {

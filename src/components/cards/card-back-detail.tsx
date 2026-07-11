@@ -1,4 +1,5 @@
-import { Sparkle } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight, Sparkle } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
 import type { CardRarityDto } from "../../lib/api-types";
 import { RarityBadge } from "../ui/rarity-badge";
 
@@ -15,6 +16,7 @@ export function CardBackDetail({
   rows,
   funFact,
   firstCollectedLabel,
+  flightLogHref,
 }: {
   kind: "AIRPORT" | "AIRCRAFT" | "AIRLINE";
   title: string;
@@ -22,6 +24,7 @@ export function CardBackDetail({
   rows: CardDetailRow[];
   funFact?: string;
   firstCollectedLabel: string | null;
+  flightLogHref?: string | null;
 }) {
   return (
     <div className="flex h-full w-full flex-col justify-between rounded-card border-2 border-border bg-surface-raised p-5 shadow-card">
@@ -32,10 +35,10 @@ export function CardBackDetail({
         </div>
         <h3 className="mt-2 font-display text-xl italic text-text-primary">{title}</h3>
 
-        <dl className="mt-4 space-y-2 border-t border-border pt-3">
+        <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-border pt-3">
           {rows.map((row) => (
-            <div key={row.label} className="flex items-center justify-between gap-3 text-sm">
-              <dt className="text-text-secondary">{row.label}</dt>
+            <div key={row.label} className="text-sm">
+              <dt className="text-xs text-text-secondary">{row.label}</dt>
               <dd className="font-mono text-text-primary">{row.value}</dd>
             </div>
           ))}
@@ -51,6 +54,15 @@ export function CardBackDetail({
         )}
         {firstCollectedLabel && (
           <p className="mt-2 font-mono text-[11px] text-text-secondary">{firstCollectedLabel}</p>
+        )}
+        {flightLogHref && (
+          <Link
+            href={flightLogHref}
+            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-sky-600 hover:underline"
+          >
+            View Flight Log Entry
+            <ArrowUpRight aria-hidden="true" />
+          </Link>
         )}
       </div>
     </div>

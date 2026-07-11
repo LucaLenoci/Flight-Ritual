@@ -8,6 +8,7 @@ import { LoggedFlight } from "../../../domain/flight-log/logged-flight";
 import { StatsSnapshot } from "../../../domain/statistics/stats-snapshot";
 import { AlbumEntry, UserCardAlbum } from "../../../application/cards/get-user-card-album";
 import { CardUnlockResult } from "../../../application/cards/unlock-cards-for-flight";
+import { UserCuriosities } from "../../../application/curiosities/get-user-curiosities";
 import { EnrichmentPreview } from "../../../application/flight-enrichment/enrich-flight";
 
 export function serializeAirport(airport: Airport) {
@@ -37,6 +38,7 @@ export function serializeAircraftType(type: AircraftType) {
     manufacturer: type.manufacturer,
     model: type.model,
     facts: type.facts,
+    cruiseSpeedKmh: type.cruiseSpeedKmh,
   };
 }
 
@@ -83,6 +85,7 @@ export function serializeAirportCard(card: AirportCard) {
     icaoCode: card.airport.icaoCode.toString(),
     city: card.airport.city,
     country: card.airport.country,
+    funFact: card.funFact(),
     rarity: card.rarity,
   };
 }
@@ -93,6 +96,7 @@ export function serializeAircraftCard(card: AircraftCard) {
     manufacturer: card.aircraftType.manufacturer,
     model: card.aircraftType.model,
     engineType: card.engineType,
+    cruiseSpeedKmh: card.aircraftType.cruiseSpeedKmh,
     funFact: card.funFact(),
     rarity: card.rarity,
   };
@@ -118,6 +122,8 @@ export function serializeAlbumEntry<TDomainCard, TDto>(
     card: serializeCard(entry.card),
     owned: entry.owned,
     firstCollectedAtUtc: entry.firstCollectedAtUtc?.toISOString() ?? null,
+    timesFlown: entry.timesFlown,
+    sourceLoggedFlightId: entry.sourceLoggedFlightId,
   };
 }
 
@@ -126,6 +132,20 @@ export function serializeCardAlbum(album: UserCardAlbum) {
     airports: album.airports.map((entry) => serializeAlbumEntry(entry, serializeAirportCard)),
     aircraft: album.aircraft.map((entry) => serializeAlbumEntry(entry, serializeAircraftCard)),
     airlines: album.airlines.map((entry) => serializeAlbumEntry(entry, serializeAirlineCard)),
+  };
+}
+
+export function serializeUserCuriosities(curiosities: UserCuriosities) {
+  return {
+    countryCount: curiosities.countryCount,
+    nextMilestone: curiosities.nextMilestone
+      ? {
+          name: curiosities.nextMilestone.milestone.name,
+          countryThreshold: curiosities.nextMilestone.milestone.countryThreshold,
+          countriesRemaining: curiosities.nextMilestone.countriesRemaining,
+        }
+      : null,
+    facts: curiosities.facts,
   };
 }
 
