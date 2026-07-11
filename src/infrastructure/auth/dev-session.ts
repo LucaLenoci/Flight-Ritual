@@ -2,7 +2,7 @@ import { randomUUID, createHmac, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { prisma } from "../persistence/prisma-client";
 
-const SESSION_COOKIE_NAME = "flight_ritual_session";
+const SESSION_COOKIE_NAME = "aloft_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 180; // 180 days
 
 /**

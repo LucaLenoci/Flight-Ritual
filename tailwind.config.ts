@@ -3,13 +3,15 @@
 // use ordinary utility classes (bg-sky-500, text-rarity-legendary, ...)
 // while the actual values live in one place (the token files).
 //
-// Colors are stored as "R G B" triplets (see colors.css) and wrapped here
-// via withOpacity() into rgb(var(--x) / <alpha-value>) — the standard
-// Tailwind v3 pattern for CSS-variable-based colors that still need to
-// support opacity modifiers like bg-sky-500/15.
+// Colors are stored as oklch() values (see colors.css). withOpacity() uses
+// CSS Color 4 relative-color syntax (`oklch(from <color> l c h / alpha)`)
+// to support Tailwind opacity modifiers like bg-sky-500/15 without needing
+// a separate "R G B" triplet representation.
 function withOpacity(cssVariable: string) {
   return ({ opacityValue }: { opacityValue?: string }) =>
-    opacityValue === undefined ? `rgb(var(${cssVariable}))` : `rgb(var(${cssVariable}) / ${opacityValue})`;
+    opacityValue === undefined
+      ? `var(${cssVariable})`
+      : `oklch(from var(${cssVariable}) l c h / ${opacityValue})`;
 }
 
 // Untyped: Tailwind's bundled Config type doesn't recognize the
@@ -33,9 +35,8 @@ const config = {
           800: withOpacity("--color-sky-800"),
           900: withOpacity("--color-sky-900"),
         },
-        amber: { 400: withOpacity("--color-amber-400"), 500: withOpacity("--color-amber-500") },
+        amber: { 400: withOpacity("--color-amber-400"), 500: withOpacity("--color-amber-500"), 600: withOpacity("--color-amber-600") },
         coral: { 400: withOpacity("--color-coral-400"), 500: withOpacity("--color-coral-500") },
-        dusk: { 400: withOpacity("--color-dusk-400"), 500: withOpacity("--color-dusk-500") },
         rarity: {
           common: withOpacity("--color-rarity-common"),
           uncommon: withOpacity("--color-rarity-uncommon"),
@@ -60,6 +61,7 @@ const config = {
         border: withOpacity("--color-border"),
         "text-primary": withOpacity("--color-text-primary"),
         "text-secondary": withOpacity("--color-text-secondary"),
+        "text-tertiary": withOpacity("--color-text-tertiary"),
         "on-gradient": withOpacity("--color-text-on-gradient"),
         success: withOpacity("--color-success"),
         warning: withOpacity("--color-warning"),
@@ -106,7 +108,6 @@ const config = {
       backgroundImage: {
         "gradient-golden-hour": "var(--gradient-golden-hour)",
         "gradient-sky-day": "var(--gradient-sky-day)",
-        "gradient-sky-night": "var(--gradient-sky-night)",
       },
       transitionTimingFunction: {
         spring: "var(--ease-spring)",

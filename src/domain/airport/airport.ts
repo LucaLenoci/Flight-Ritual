@@ -10,5 +10,6 @@ export class Airport {
     readonly country: string,
     readonly coordinates: Coordinates,
     readonly timeZone: string,
+    readonly continent: string | null = null,
   ) {}
 }

@@ -26,8 +26,8 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flight Ritual",
-  description: "A premium companion for people who love to fly.",
+  title: "Aloft",
+  description: "Log your flights, build your collection — a personal flight-life companion.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

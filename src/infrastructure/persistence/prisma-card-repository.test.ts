@@ -47,8 +47,8 @@ describe("PrismaCardRepository (DB race safety)", () => {
     const now = new Date();
 
     const [first, second] = await Promise.all([
-      repository.tryUnlockAirportCard(userId, airportIataCode, now),
-      repository.tryUnlockAirportCard(userId, airportIataCode, now),
+      repository.tryUnlockAirportCard(userId, airportIataCode, now, null),
+      repository.tryUnlockAirportCard(userId, airportIataCode, now, null),
     ]);
 
     const successCount = [first, second].filter(Boolean).length;
@@ -60,8 +60,8 @@ describe("PrismaCardRepository (DB race safety)", () => {
 
   it("a third attempt after the card is already owned correctly reports 'not new'", async () => {
     const now = new Date();
-    const first = await repository.tryUnlockAirportCard(userId, airportIataCode, now);
-    const repeat = await repository.tryUnlockAirportCard(userId, airportIataCode, now);
+    const first = await repository.tryUnlockAirportCard(userId, airportIataCode, now, null);
+    const repeat = await repository.tryUnlockAirportCard(userId, airportIataCode, now, null);
 
     expect(first).toBe(true);
     expect(repeat).toBe(false);

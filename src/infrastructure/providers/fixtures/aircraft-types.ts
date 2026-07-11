@@ -1,7 +1,18 @@
-import { ProviderAircraftType } from "../../../application/ports/aircraft-data-provider";
+export interface AircraftTypeSeed {
+  icaoTypeCode: string;
+  manufacturer: string;
+  model: string;
+  facts: string[];
+}
 
-export const AIRCRAFT_TYPES = {
-  B77W: {
+/**
+ * Curated seed for the AircraftType catalog (model/type, never a tail
+ * number). No equally convenient free bulk open dataset of aircraft
+ * types-with-ICAO-codes exists (unlike Airport/Airline), so this list is
+ * hand-curated and deliberately expandable — add entries here as needed.
+ */
+export const AIRCRAFT_TYPES: AircraftTypeSeed[] = [
+  {
     icaoTypeCode: "B77W",
     manufacturer: "Boeing",
     model: "777-300ER",
@@ -11,7 +22,7 @@ export const AIRCRAFT_TYPES = {
       "Its GE90 engines are wide enough to fit a Boeing 737 fuselage through the fan.",
     ],
   },
-  A359: {
+  {
     icaoTypeCode: "A359",
     manufacturer: "Airbus",
     model: "A350-900",
@@ -20,7 +31,7 @@ export const AIRCRAFT_TYPES = {
       "Its distinctive curved wingtips reduce drag and improve fuel efficiency.",
     ],
   },
-  B789: {
+  {
     icaoTypeCode: "B789",
     manufacturer: "Boeing",
     model: "787-9 Dreamliner",
@@ -29,7 +40,7 @@ export const AIRCRAFT_TYPES = {
       "Its windows are the largest of any commercial airliner and dim electronically instead of using shades.",
     ],
   },
-  A388: {
+  {
     icaoTypeCode: "A388",
     manufacturer: "Airbus",
     model: "A380-800",
@@ -38,7 +49,7 @@ export const AIRCRAFT_TYPES = {
       "A full A380 can carry more than 800 passengers in an all-economy configuration.",
     ],
   },
-  A20N: {
+  {
     icaoTypeCode: "A20N",
     manufacturer: "Airbus",
     model: "A320neo",
@@ -47,4 +58,40 @@ export const AIRCRAFT_TYPES = {
       "Sharklet wingtip devices reduce drag and add range without lengthening the wing.",
     ],
   },
-} satisfies Record<string, ProviderAircraftType>;
+  {
+    icaoTypeCode: "A21N",
+    manufacturer: "Airbus",
+    model: "A321neo",
+    facts: [
+      "The A321neo is the longest-fuselage member of the A320 family, seating up to 244 passengers.",
+      "Its extended range variants can fly routes once reserved for widebody aircraft.",
+    ],
+  },
+  {
+    icaoTypeCode: "B738",
+    manufacturer: "Boeing",
+    model: "737-800",
+    facts: [
+      "The 737-800 is one of the most-produced commercial jetliners in aviation history.",
+      "It shares over 90% parts commonality with earlier 737 Next Generation variants.",
+    ],
+  },
+  {
+    icaoTypeCode: "B39M",
+    manufacturer: "Boeing",
+    model: "737 MAX 9",
+    facts: [
+      "The MAX series uses CFM LEAP-1B engines with larger fan blades than previous 737s.",
+      "Split-tip winglets on the MAX reduce fuel burn by roughly 1.5% versus blended winglets.",
+    ],
+  },
+  {
+    icaoTypeCode: "E190",
+    manufacturer: "Embraer",
+    model: "E190",
+    facts: [
+      "The E190's 2-2 seating layout means no middle seats on a mainline-style regional jet.",
+      "It was designed with a fuselage cross-section wide enough for overhead bins to fit standard roll-aboard bags.",
+    ],
+  },
+];

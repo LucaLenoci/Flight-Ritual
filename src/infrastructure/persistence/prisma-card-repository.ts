@@ -16,23 +16,42 @@ const UNIQUE_CONSTRAINT_VIOLATION = "P2002";
 export class PrismaCardRepository implements CardRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async tryUnlockAirportCard(userId: string, airportIataCode: string, nowUtc: Date): Promise<boolean> {
+  async tryUnlockAirportCard(
+    userId: string,
+    airportIataCode: string,
+    nowUtc: Date,
+    sourceLoggedFlightId: string | null,
+  ): Promise<boolean> {
     return this.tryCreate(() =>
-      this.db.userAirportCard.create({ data: { userId, airportIataCode, firstCollectedAtUtc: nowUtc } }),
-    );
-  }
-
-  async tryUnlockAircraftCard(userId: string, aircraftTypeIcaoCode: string, nowUtc: Date): Promise<boolean> {
-    return this.tryCreate(() =>
-      this.db.userAircraftCard.create({
-        data: { userId, aircraftTypeCode: aircraftTypeIcaoCode, firstCollectedAtUtc: nowUtc },
+      this.db.userAirportCard.create({
+        data: { userId, airportIataCode, firstCollectedAtUtc: nowUtc, sourceLoggedFlightId },
       }),
     );
   }
 
-  async tryUnlockAirlineCard(userId: string, airlineIataCode: string, nowUtc: Date): Promise<boolean> {
+  async tryUnlockAircraftCard(
+    userId: string,
+    aircraftTypeIcaoCode: string,
+    nowUtc: Date,
+    sourceLoggedFlightId: string | null,
+  ): Promise<boolean> {
     return this.tryCreate(() =>
-      this.db.userAirlineCard.create({ data: { userId, airlineIataCode, firstCollectedAtUtc: nowUtc } }),
+      this.db.userAircraftCard.create({
+        data: { userId, aircraftTypeCode: aircraftTypeIcaoCode, firstCollectedAtUtc: nowUtc, sourceLoggedFlightId },
+      }),
+    );
+  }
+
+  async tryUnlockAirlineCard(
+    userId: string,
+    airlineIataCode: string,
+    nowUtc: Date,
+    sourceLoggedFlightId: string | null,
+  ): Promise<boolean> {
+    return this.tryCreate(() =>
+      this.db.userAirlineCard.create({
+        data: { userId, airlineIataCode, firstCollectedAtUtc: nowUtc, sourceLoggedFlightId },
+      }),
     );
   }
 

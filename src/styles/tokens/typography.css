@@ -1,8 +1,9 @@
 /**
- * Aloft typography tokens. Font family assignments (Instrument Serif /
- * Plus Jakarta Sans / JetBrains Mono) are as specified in the brief; the
- * loaded weights and the numeric type scale below are this implementation's
- * authored interpretation (no scale was provided in the source prose).
+ * Aloft typography tokens. Font families (Instrument Serif / Plus Jakarta
+ * Sans / JetBrains Mono) and the numeric type scale below follow the
+ * attached Aloft design system. Fonts are self-hosted via next/font/google
+ * (see app/layout.tsx) rather than the design system's CDN @import, so the
+ * --next-font-* variables it injects are the actual source of these families.
  */
 
 :root {
@@ -20,7 +21,7 @@
   --text-3xl: 2.25rem; /* 36px — moment headlines */
   --text-4xl: 3rem; /* 48px — hero headlines */
 
-  --tracking-eyebrow: 0.14em;
+  --tracking-eyebrow: 0.08em;
   --leading-tight: 1.15;
   --leading-normal: 1.5;
 }

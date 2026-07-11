@@ -3,32 +3,7 @@
 // client components never import server-only code (Prisma, Node crypto, ...).
 
 export type CardRarityDto = "COMMON" | "UNCOMMON" | "RARE" | "LEGENDARY";
-
-export type FlightPhaseDto =
-  | "SCHEDULED"
-  | "BOARDING"
-  | "DEPARTED"
-  | "AIRBORNE"
-  | "DESCENDING"
-  | "LANDED"
-  | "ARRIVED"
-  | "CANCELLED"
-  | "DIVERTED";
-
-export type JourneyEventTypeDto =
-  | "SCHEDULED"
-  | "GATE_ASSIGNED"
-  | "GATE_CHANGED"
-  | "DELAY_UPDATED"
-  | "BOARDING_STARTED"
-  | "DEPARTED"
-  | "TAKEOFF"
-  | "CRUISE_REACHED"
-  | "DESCENT_STARTED"
-  | "LANDED"
-  | "ARRIVED_AT_GATE"
-  | "CANCELLED"
-  | "DIVERTED";
+export type FieldProvenanceDto = "ENRICHED" | "USER_PROVIDED";
 
 export interface AirportDto {
   iataCode: string;
@@ -36,126 +11,106 @@ export interface AirportDto {
   name: string;
   city: string;
   country: string;
+  continent: string | null;
   latitude: number;
   longitude: number;
-  timeZone: string;
 }
 
-export interface AircraftAssignmentDto {
-  registration: string;
-  type: { icaoTypeCode: string; manufacturer: string; model: string; facts: string[] };
-  ageYears: number | null;
-  operatorIataCode: string | null;
-  source: "PROVIDER_CONFIRMED" | "HISTORICAL_PATTERN";
-  confidence: "HIGH" | "MEDIUM" | "LOW";
+export interface AirlineDto {
+  iataCode: string;
+  icaoDesignator: string;
+  name: string;
 }
 
-export interface FlightDto {
+export interface AircraftTypeDto {
+  icaoTypeCode: string;
+  manufacturer: string;
+  model: string;
+  facts: string[];
+}
+
+export interface LoggedFlightProvenanceDto {
+  airline: FieldProvenanceDto;
+  origin: FieldProvenanceDto;
+  destination: FieldProvenanceDto;
+  aircraftType: FieldProvenanceDto;
+}
+
+export interface FlightUnlockBadgeDto {
+  kind: "AIRPORT" | "AIRCRAFT" | "AIRLINE";
+  label: string;
+}
+
+export interface LoggedFlightDto {
   id: string;
   flightNumber: string;
-  airline: { iataCode: string; icaoDesignator: string; name: string };
+  flightDate: string;
+  airline: AirlineDto;
   origin: AirportDto;
   destination: AirportDto;
   distanceKm: number;
-  scheduledDepartureUtc: string;
-  scheduledArrivalUtc: string;
-  actualDepartureUtc: string | null;
-  actualArrivalUtc: string | null;
-  phase: FlightPhaseDto;
-  delayMinutes: number;
-  isDelayed: boolean;
-  gate: string | null;
-  aircraftAssignment: AircraftAssignmentDto | null;
-}
-
-export interface JourneyEventDto {
-  type: JourneyEventTypeDto;
-  occurredAtUtc: string;
-  detail: Record<string, unknown>;
-}
-
-export type WindowSideDto = "LEFT" | "RIGHT" | "EITHER" | "NOT_APPLICABLE";
-
-export interface WindowRecommendationDto {
-  side: WindowSideDto;
-  confidence: "HIGH" | "MEDIUM" | "LOW";
-  sunElevationDeg: number | null;
-  reason: string;
-  bestMomentUtc: string | null;
-}
-
-export interface RunwayMomentDto {
-  phase: "TAKEOFF" | "LANDING";
-  occurredAtUtc: string;
-  headline: string;
-  subtext: string;
-}
-
-export interface FlightDetailResponse {
-  flight: FlightDto;
-  events: JourneyEventDto[];
-  goldenHour: WindowRecommendationDto;
-  runwayMoment: RunwayMomentDto | null;
-  degraded: boolean;
-}
-
-export interface TrackableFlightDto {
-  flightNumber: string;
-  scheduledDepartureUtc: string;
-  originIataCode: string;
-  destinationIataCode: string;
-  airlineName: string;
-}
-
-export interface FlightMemorySnapshotDto {
-  flightNumber: string;
-  airlineIataCode: string;
-  airlineName: string;
-  originIataCode: string;
-  originCity: string;
-  originCountry: string;
-  destinationIataCode: string;
-  destinationCity: string;
-  destinationCountry: string;
-  departureDateUtc: string;
-  distanceKm: number;
-  durationMinutes: number;
-  aircraftTypeIcaoCode: string | null;
-  aircraftTypeModel: string | null;
-  aircraftRegistration: string | null;
-}
-
-export interface FlightMemoryDto {
-  id: string;
-  savedAtUtc: string;
+  aircraftType: AircraftTypeDto | null;
+  tailNumber: string | null;
   note: string | null;
-  snapshot: FlightMemorySnapshotDto;
+  provenance: LoggedFlightProvenanceDto;
+  createdAt: string;
+  unlocks?: FlightUnlockBadgeDto[];
 }
 
-export interface UserCollectionDto {
-  airportIataCodes: string[];
-  airlineIataCodes: string[];
-  aircraftTypeIcaoCodes: string[];
-  routeKeys: string[];
-  countries: string[];
+export interface FlightLogResponse {
+  flights: LoggedFlightDto[];
+}
+
+export interface FlightRouteLookupResultDto {
+  originIataCode: string;
+  destinationIataCode: string;
+  aircraftTypeIcaoCode: string | null;
+}
+
+export interface EnrichmentPreviewDto {
+  flightNumber: string;
+  airline: AirlineDto | null;
+  route: FlightRouteLookupResultDto | null;
+}
+
+export interface RankedAirlineDto {
+  iataCode: string;
+  name: string;
+  flightCount: number;
+}
+
+export interface RankedAircraftTypeDto {
+  icaoTypeCode: string;
+  model: string;
+  flightCount: number;
+}
+
+export interface RankedAirportDto {
+  iataCode: string;
+  city: string;
+  visitCount: number;
+}
+
+export interface LoggedFlightRefDto {
+  flightNumber: string;
+  flightDate: string;
 }
 
 export interface StatsSnapshotDto {
   totalFlights: number;
   totalDistanceKm: number;
-  totalFlightMinutes: number;
   uniqueAirportCount: number;
   uniqueAirlineCount: number;
   uniqueAircraftTypeCount: number;
   uniqueCountryCount: number;
+  uniqueContinentCount: number;
+  mostFlownAirline: RankedAirlineDto | null;
+  mostFlownAircraftType: RankedAircraftTypeDto | null;
+  mostVisitedAirport: RankedAirportDto | null;
   longestFlight: { flightNumber: string; distanceKm: number } | null;
+  firstLoggedFlight: LoggedFlightRefDto | null;
+  latestLoggedFlight: LoggedFlightRefDto | null;
   mostFrequentRoute: { routeKey: string; flightCount: number } | null;
-}
-
-export interface LegacyDashboardResponse {
-  memories: FlightMemoryDto[];
-  collection: UserCollectionDto;
-  stats: StatsSnapshotDto;
 }
 
 export interface AirportCardDto {

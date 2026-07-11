@@ -1,60 +1,66 @@
 import { randomUUID } from "node:crypto";
-import { EnrichAircraftAssignmentUseCase } from "../application/aircraft-enrichment/enrich-aircraft-assignment";
 import { GetUserCardAlbumUseCase } from "../application/cards/get-user-card-album";
 import { UnlockCardsForFlightUseCase } from "../application/cards/unlock-cards-for-flight";
-import { RecommendWindowUseCase } from "../application/golden-hour-engine/recommend-window";
-import { TrackFlightUseCase } from "../application/journey-engine/track-flight";
-import { GetUserLegacyUseCase } from "../application/legacy-service/get-user-legacy";
-import { RecordCompletedFlightUseCase } from "../application/legacy-service/record-completed-flight";
+import { EnrichFlightUseCase } from "../application/flight-enrichment/enrich-flight";
+import { GetFlightLogUseCase } from "../application/flight-log/get-flight-log";
+import { SaveLoggedFlightUseCase } from "../application/flight-log/save-logged-flight";
 import { SystemClock } from "../application/ports/clock";
-import { RunwayMomentService } from "../application/runway-moment/runway-moment-service";
-import { MockAircraftDataProvider } from "./providers/mock-aircraft-data-provider";
-import { MockCardCatalogProvider } from "./providers/mock-card-catalog-provider";
-import { MockFlightDataProvider } from "./providers/mock-flight-data-provider";
+import { GetUserStatisticsUseCase } from "../application/statistics/get-user-statistics";
 import { PrismaCardRepository } from "./persistence/prisma-card-repository";
-import { PrismaFlightRepository } from "./persistence/prisma-flight-repository";
-import { PrismaLegacyRepository } from "./persistence/prisma-legacy-repository";
+import { PrismaFlightLogRepository } from "./persistence/prisma-flight-log-repository";
 import { prisma } from "./persistence/prisma-client";
+import { NullFlightRouteLookupProvider } from "./providers/null-flight-route-lookup-provider";
+import { PrismaAircraftTypeReferenceProvider } from "./providers/prisma-aircraft-type-reference-provider";
+import { PrismaAirlineReferenceProvider } from "./providers/prisma-airline-reference-provider";
+import { PrismaAirportReferenceProvider } from "./providers/prisma-airport-reference-provider";
+import { PrismaCardCatalogProvider } from "./providers/prisma-card-catalog-provider";
 
 /**
  * Composition root: the one place infrastructure implementations are wired
  * to application ports. API routes depend on this module, never on concrete
- * infrastructure classes directly — swapping the flight data provider or
- * persistence technology only means changing wiring here.
- *
- * Held as module-level singletons (not per-request) so the mock providers'
- * anchor time — and therefore the demo's simulated flight timelines — stays
- * stable for the life of the server process.
+ * infrastructure classes directly — swapping the reference data source or
+ * persistence technology only means changing wiring here. In particular,
+ * FlightRouteLookupProvider is wired to NullFlightRouteLookupProvider today
+ * (see that file's doc comment on why); replacing it with a real provider
+ * later is a one-line change here.
  */
-const globalForContainer = globalThis as unknown as { flightRitualContainer?: ReturnType<typeof buildContainer> };
+const globalForContainer = globalThis as unknown as { aloftContainer?: ReturnType<typeof buildContainer> };
 
 function buildContainer() {
   const clock = new SystemClock();
-  const flightDataProvider = new MockFlightDataProvider(clock);
-  const aircraftDataProvider = new MockAircraftDataProvider(clock);
-  const cardCatalogProvider = new MockCardCatalogProvider();
-  const flightRepository = new PrismaFlightRepository(prisma);
-  const legacyRepository = new PrismaLegacyRepository(prisma);
+  const flightLogRepository = new PrismaFlightLogRepository(prisma);
   const cardRepository = new PrismaCardRepository(prisma);
+  const cardCatalogProvider = new PrismaCardCatalogProvider(prisma);
+  const airportReferenceProvider = new PrismaAirportReferenceProvider(prisma);
+  const airlineReferenceProvider = new PrismaAirlineReferenceProvider(prisma);
+  const aircraftTypeReferenceProvider = new PrismaAircraftTypeReferenceProvider(prisma);
+  const flightRouteLookupProvider = new NullFlightRouteLookupProvider();
 
   return {
     clock,
-    flightDataProvider,
-    trackFlight: new TrackFlightUseCase(flightDataProvider, flightRepository, randomUUID),
-    enrichAircraftAssignment: new EnrichAircraftAssignmentUseCase(aircraftDataProvider, clock),
-    recommendWindow: new RecommendWindowUseCase(),
-    runwayMoment: new RunwayMomentService(),
-    recordCompletedFlight: new RecordCompletedFlightUseCase(flightRepository, legacyRepository, clock, randomUUID),
-    getUserLegacy: new GetUserLegacyUseCase(legacyRepository),
-    unlockCardsForFlight: new UnlockCardsForFlightUseCase(cardRepository, flightRepository, clock),
+    airportReferenceProvider,
+    airlineReferenceProvider,
+    aircraftTypeReferenceProvider,
+    enrichFlight: new EnrichFlightUseCase(airlineReferenceProvider, flightRouteLookupProvider),
+    saveLoggedFlight: new SaveLoggedFlightUseCase(
+      flightLogRepository,
+      airportReferenceProvider,
+      airlineReferenceProvider,
+      aircraftTypeReferenceProvider,
+      flightRouteLookupProvider,
+      clock,
+      randomUUID,
+    ),
+    getFlightLog: new GetFlightLogUseCase(flightLogRepository, cardRepository),
+    getUserStatistics: new GetUserStatisticsUseCase(flightLogRepository),
+    unlockCardsForFlight: new UnlockCardsForFlightUseCase(cardRepository, flightLogRepository, clock),
     getUserCardAlbum: new GetUserCardAlbumUseCase(cardRepository, cardCatalogProvider),
-    flightRepository,
   };
 }
 
 export function getContainer() {
-  if (!globalForContainer.flightRitualContainer) {
-    globalForContainer.flightRitualContainer = buildContainer();
+  if (!globalForContainer.aloftContainer) {
+    globalForContainer.aloftContainer = buildContainer();
   }
-  return globalForContainer.flightRitualContainer;
+  return globalForContainer.aloftContainer;
 }

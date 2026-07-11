@@ -17,15 +17,10 @@ import { ZodError } from "zod";
 const STATUS_BY_ERROR_NAME: Record<string, number> = {
   InvalidValueError: 400,
   IllegalStateTransitionError: 400,
-  FlightNotFoundError: 404,
   FlightNotFoundByIdError: 404,
-  FlightNotEligibleForLegacyError: 409,
+  UnknownReferenceEntityError: 400,
   UnauthorizedError: 401,
-  FlightDataProviderError: 503,
-  AircraftDataProviderError: 503,
 };
-
-const SERVICE_UNAVAILABLE_MESSAGE = "Live flight data is temporarily unavailable";
 
 export function toErrorResponse(error: unknown): NextResponse {
   if (error instanceof ZodError || (error as { name?: string })?.name === "ZodError") {
@@ -39,8 +34,7 @@ export function toErrorResponse(error: unknown): NextResponse {
   const name = error instanceof Error ? error.name : undefined;
   const status = name ? STATUS_BY_ERROR_NAME[name] : undefined;
   if (status) {
-    const message = status === 503 ? SERVICE_UNAVAILABLE_MESSAGE : (error as Error).message;
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json({ error: (error as Error).message }, { status });
   }
 
   console.error("Unhandled API error:", error);

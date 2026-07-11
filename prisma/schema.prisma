@@ -12,128 +12,99 @@ datasource db {
 }
 
 model User {
-  id             String              @id @default(cuid())
-  createdAt      DateTime            @default(now())
-  flightMemories FlightMemory[]
-  airportCards   UserAirportCard[]
-  aircraftCards  UserAircraftCard[]
-  airlineCards   UserAirlineCard[]
+  id            String             @id @default(cuid())
+  createdAt     DateTime           @default(now())
+  loggedFlights LoggedFlight[]
+  airportCards  UserAirportCard[]
+  aircraftCards UserAircraftCard[]
+  airlineCards  UserAirlineCard[]
 }
 
+// Reference data: airports a user can log a flight through. Seeded in bulk
+// from the open OurAirports dataset (see infrastructure/seed) — continent is
+// carried directly from that source to support "continents reached" stats.
 model Airport {
-  iataCode  String   @id
-  icaoCode  String   @unique
+  iataCode  String  @id
+  icaoCode  String  @unique
   name      String
   city      String
   country   String
+  continent String?
   latitude  Float
   longitude Float
   timeZone  String
 
-  originFlights      Flight[]          @relation("OriginAirport")
-  destinationFlights Flight[]          @relation("DestinationAirport")
+  originFlights      LoggedFlight[]    @relation("OriginAirport")
+  destinationFlights LoggedFlight[]    @relation("DestinationAirport")
   userCards          UserAirportCard[]
 }
 
+// Reference data: airlines a user can log a flight on. Seeded in bulk from
+// the open OpenFlights dataset.
 model Airline {
-  iataCode String   @id
-  icaoCode String   @unique
-  name     String
-  flights  Flight[]
-  userCards UserAirlineCard[]
+  iataCode      String            @id
+  icaoCode      String            @unique
+  name          String
+  loggedFlights LoggedFlight[]
+  userCards     UserAirlineCard[]
 }
 
+// Reference data: aircraft *models*, not tail-numbered instances — this is
+// deliberate, since Collectible Cards unlock per model/type, never per
+// registration. No equally convenient free bulk dataset exists for this
+// entity (unlike Airport/Airline), so this stays a curated, expandable seed
+// list (see infrastructure/providers/fixtures/aircraft-types.ts).
 model AircraftType {
-  icaoTypeCode String     @id
-  manufacturer String
-  model        String
-  facts        String // JSON-encoded string[] of interesting facts
-  aircraft     Aircraft[]
-  userCards    UserAircraftCard[]
+  icaoTypeCode  String             @id
+  manufacturer  String
+  model         String
+  facts         String // JSON-encoded string[] of interesting facts
+  loggedFlights LoggedFlight[]
+  userCards     UserAircraftCard[]
 }
 
-model Aircraft {
-  registration     String       @id
-  aircraftTypeCode String
-  aircraftType     AircraftType @relation(fields: [aircraftTypeCode], references: [icaoTypeCode])
-  operatorIataCode String?
-  manufactureDate  DateTime?
+// A user's own record of a flight they took: flight number + date, entered
+// by the user, then enriched where possible (airline, deterministically
+// resolved from the flight-number prefix) and otherwise supplied manually
+// (route, aircraft type — no reliable free open-data source exists for
+// "flight number + past date -> route + aircraft type"). `*Source` columns
+// record provenance per field so manual corrections are explicit and
+// traceable rather than silently indistinguishable from enriched data.
+model LoggedFlight {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  flightNumber  String
+  flightDateUtc DateTime
 
-  assignments AircraftAssignment[]
-}
+  airlineIataCode String
+  airline         Airline @relation(fields: [airlineIataCode], references: [iataCode])
+  airlineSource   String  @default("USER_PROVIDED")
 
-model Flight {
-  id                     String    @id @default(cuid())
-  flightNumber           String
-  airlineIataCode        String
-  airline                Airline   @relation(fields: [airlineIataCode], references: [iataCode])
-  originIataCode         String
-  origin                 Airport   @relation("OriginAirport", fields: [originIataCode], references: [iataCode])
-  destinationIataCode    String
-  destination            Airport   @relation("DestinationAirport", fields: [destinationIataCode], references: [iataCode])
-  scheduledDepartureUtc  DateTime
-  scheduledArrivalUtc    DateTime
-  actualDepartureUtc     DateTime?
-  actualArrivalUtc       DateTime?
-  gate                   String?
-  delayMinutes           Int       @default(0)
-  phase                  String    @default("SCHEDULED")
+  originIataCode String
+  origin         Airport @relation("OriginAirport", fields: [originIataCode], references: [iataCode])
+  originSource   String  @default("USER_PROVIDED")
 
-  aircraftAssignment AircraftAssignment?
-  journeyEvents      JourneyEvent[]
-  flightMemories     FlightMemory[]
+  destinationIataCode String
+  destination         Airport @relation("DestinationAirport", fields: [destinationIataCode], references: [iataCode])
+  destinationSource   String  @default("USER_PROVIDED")
+
+  aircraftTypeCode   String?
+  aircraftType       AircraftType? @relation(fields: [aircraftTypeCode], references: [icaoTypeCode])
+  aircraftTypeSource String        @default("USER_PROVIDED")
+
+  tailNumber String? // flavor only — never used for card unlock
+  note       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([flightNumber, scheduledDepartureUtc])
-  @@index([phase])
-}
+  airportCardsUnlocked  UserAirportCard[]
+  aircraftCardsUnlocked UserAircraftCard[]
+  airlineCardsUnlocked  UserAirlineCard[]
 
-model AircraftAssignment {
-  id                 String   @id @default(cuid())
-  flightId           String   @unique
-  flight             Flight   @relation(fields: [flightId], references: [id])
-  aircraftRegistration String
-  aircraft           Aircraft @relation(fields: [aircraftRegistration], references: [registration])
-  source             String
-  confidence         String
-  assignedAtUtc      DateTime @default(now())
-}
-
-// One row per distinct journey occurrence. `sequenceKey` disambiguates
-// repeatable event types (e.g. GATE_CHANGED can fire more than once per
-// flight); the unique constraint is what makes ingestion idempotent —
-// re-processing the same provider payload never creates a duplicate row.
-model JourneyEvent {
-  id          String   @id @default(cuid())
-  flightId    String
-  flight      Flight   @relation(fields: [flightId], references: [id])
-  type        String
-  sequenceKey String
-  occurredAtUtc DateTime
-  payload     String // JSON-encoded event-specific detail
-
-  @@unique([flightId, type, sequenceKey])
-  @@index([flightId])
-}
-
-// A user's saved memory of a flight. `flightId` is intentionally NOT globally
-// unique: the same real-world flight can be saved by many different users,
-// each to their own legacy log. Uniqueness is scoped per (userId, flightId)
-// so a single user can't save the same flight twice.
-model FlightMemory {
-  id           String   @id @default(cuid())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  flightId     String
-  flight       Flight   @relation(fields: [flightId], references: [id])
-  snapshotJson String // JSON-encoded FlightMemorySnapshot, captured at save time
-  savedAtUtc   DateTime @default(now())
-  note         String?
-
-  @@unique([userId, flightId])
   @@index([userId])
+  @@index([userId, flightDateUtc])
 }
 
 // Collectible Cards ownership. Each of these three junction tables is the
@@ -143,38 +114,44 @@ model FlightMemory {
 // entity (a safe create-and-catch-conflict upsert relies on this, not on
 // an application-level check, which could race). The reference entities
 // (Airport/AircraftType/Airline) are shared, not duplicated per user; only
-// firstCollectedAtUtc is per-user state here.
+// firstCollectedAtUtc and the triggering flight are per-user state here.
 model UserAirportCard {
-  id                  String   @id @default(cuid())
-  userId              String
-  user                User     @relation(fields: [userId], references: [id])
-  airportIataCode     String
-  airport             Airport  @relation(fields: [airportIataCode], references: [iataCode])
-  firstCollectedAtUtc DateTime @default(now())
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id])
+  airportIataCode      String
+  airport              Airport       @relation(fields: [airportIataCode], references: [iataCode])
+  firstCollectedAtUtc  DateTime      @default(now())
+  sourceLoggedFlightId String?
+  sourceLoggedFlight   LoggedFlight? @relation(fields: [sourceLoggedFlightId], references: [id], onDelete: SetNull)
 
   @@unique([userId, airportIataCode])
   @@index([userId])
 }
 
 model UserAircraftCard {
-  id                  String       @id @default(cuid())
-  userId              String
-  user                User         @relation(fields: [userId], references: [id])
-  aircraftTypeCode    String
-  aircraftType        AircraftType @relation(fields: [aircraftTypeCode], references: [icaoTypeCode])
-  firstCollectedAtUtc DateTime     @default(now())
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id])
+  aircraftTypeCode     String
+  aircraftType         AircraftType  @relation(fields: [aircraftTypeCode], references: [icaoTypeCode])
+  firstCollectedAtUtc  DateTime      @default(now())
+  sourceLoggedFlightId String?
+  sourceLoggedFlight   LoggedFlight? @relation(fields: [sourceLoggedFlightId], references: [id], onDelete: SetNull)
 
   @@unique([userId, aircraftTypeCode])
   @@index([userId])
 }
 
 model UserAirlineCard {
-  id                  String   @id @default(cuid())
-  userId              String
-  user                User     @relation(fields: [userId], references: [id])
-  airlineIataCode     String
-  airline             Airline  @relation(fields: [airlineIataCode], references: [iataCode])
-  firstCollectedAtUtc DateTime @default(now())
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id])
+  airlineIataCode      String
+  airline              Airline       @relation(fields: [airlineIataCode], references: [iataCode])
+  firstCollectedAtUtc  DateTime      @default(now())
+  sourceLoggedFlightId String?
+  sourceLoggedFlight   LoggedFlight? @relation(fields: [sourceLoggedFlightId], references: [id], onDelete: SetNull)
 
   @@unique([userId, airlineIataCode])
   @@index([userId])

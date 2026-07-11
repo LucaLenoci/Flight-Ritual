@@ -54,7 +54,7 @@ export function CardDetailView({ kind, code }: { kind: string; code: string }) {
     const entry = album.airports.find((e) => e.card.iataCode === code);
     if (!entry) return <NotFound />;
     return (
-      <DetailShell backHref="/legacy">
+      <DetailShell backHref="/collection">
         {entry.owned ? (
           <CardFlipper
             front={<AirportCard card={entry.card} owned firstCollectedAtUtc={entry.firstCollectedAtUtc} />}
@@ -85,7 +85,7 @@ export function CardDetailView({ kind, code }: { kind: string; code: string }) {
     const entry = album.aircraft.find((e) => e.card.icaoTypeCode === code);
     if (!entry) return <NotFound />;
     return (
-      <DetailShell backHref="/legacy">
+      <DetailShell backHref="/collection">
         {entry.owned ? (
           <CardFlipper
             front={<AircraftCard card={entry.card} owned firstCollectedAtUtc={entry.firstCollectedAtUtc} />}
@@ -116,7 +116,7 @@ export function CardDetailView({ kind, code }: { kind: string; code: string }) {
   const entry = album.airlines.find((e) => e.card.iataCode === code);
   if (!entry) return <NotFound />;
   return (
-    <DetailShell backHref="/legacy">
+    <DetailShell backHref="/collection">
       {entry.owned ? (
         <CardFlipper
           front={<AirlineCard card={entry.card} owned firstCollectedAtUtc={entry.firstCollectedAtUtc} />}
@@ -149,7 +149,7 @@ function DetailShell({ children, backHref }: { children: React.ReactNode; backHr
     <div className="mx-auto max-w-xs px-4 py-10">
       <Link href={backHref} className="mb-6 inline-flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary">
         <ArrowLeft aria-hidden="true" />
-        Back to Legacy
+        Back to Collection
       </Link>
       {children}
       <p className="mt-4 text-center text-xs text-text-secondary">Tap the card to flip it</p>
@@ -161,8 +161,8 @@ function NotFound() {
   return (
     <div className="mx-auto max-w-md px-4 py-16 text-center">
       <p className="font-display text-2xl italic text-text-primary">Card not found</p>
-      <Link href="/legacy" className="mt-4 inline-block text-sm text-sky-600 hover:underline">
-        Back to My Flight Legacy
+      <Link href="/collection" className="mt-4 inline-block text-sm text-sky-600 hover:underline">
+        Back to My Collection
       </Link>
     </div>
   );

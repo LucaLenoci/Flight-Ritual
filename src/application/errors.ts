@@ -5,15 +5,9 @@ export abstract class ApplicationError extends Error {
   }
 }
 
-export class FlightNotFoundError extends ApplicationError {
-  constructor(flightNumber: string, scheduledDepartureUtc: Date) {
-    super(`No flight found for ${flightNumber} on ${scheduledDepartureUtc.toISOString().slice(0, 10)}`);
-  }
-}
-
 export class FlightNotFoundByIdError extends ApplicationError {
   constructor(flightId: string) {
-    super(`No flight found with id ${flightId}`);
+    super(`No logged flight found with id ${flightId}`);
   }
 }
 
@@ -23,8 +17,9 @@ export class UnauthorizedError extends ApplicationError {
   }
 }
 
-export class FlightNotEligibleForLegacyError extends ApplicationError {
-  constructor(flightId: string) {
-    super(`Flight ${flightId} has not arrived yet and cannot be saved to Flight Legacy`);
+/** Raised when a client submits a reference code (airport/airline/aircraft type) that doesn't exist in the seeded catalog — validation at the domain boundary, never trusting client-supplied codes. */
+export class UnknownReferenceEntityError extends ApplicationError {
+  constructor(entityKind: "airport" | "airline" | "aircraft type", code: string) {
+    super(`Unknown ${entityKind}: "${code}"`);
   }
 }

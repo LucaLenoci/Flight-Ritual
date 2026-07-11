@@ -30,28 +30,32 @@ export class GetUserCardAlbumUseCase {
   ) {}
 
   async execute(userId: string): Promise<UserCardAlbum> {
-    const [ownedAirports, ownedAircraft, ownedAirlines] = await Promise.all([
-      this.cardRepository.listUserAirportCards(userId),
-      this.cardRepository.listUserAircraftCards(userId),
-      this.cardRepository.listUserAirlineCards(userId),
-    ]);
+    const [ownedAirports, ownedAircraft, ownedAirlines, catalogAirports, catalogAircraft, catalogAirlines] =
+      await Promise.all([
+        this.cardRepository.listUserAirportCards(userId),
+        this.cardRepository.listUserAircraftCards(userId),
+        this.cardRepository.listUserAirlineCards(userId),
+        this.catalogProvider.listAirportCards(),
+        this.catalogProvider.listAircraftCards(),
+        this.catalogProvider.listAirlineCards(),
+      ]);
 
     const airportOwnership = new Map(ownedAirports.map((c) => [c.airportIataCode, c.firstCollectedAtUtc]));
     const aircraftOwnership = new Map(ownedAircraft.map((c) => [c.aircraftTypeIcaoCode, c.firstCollectedAtUtc]));
     const airlineOwnership = new Map(ownedAirlines.map((c) => [c.airlineIataCode, c.firstCollectedAtUtc]));
 
     return {
-      airports: this.catalogProvider.listAirportCards().map((card) => ({
+      airports: catalogAirports.map((card) => ({
         card,
         owned: airportOwnership.has(card.airport.iataCode.toString()),
         firstCollectedAtUtc: airportOwnership.get(card.airport.iataCode.toString()) ?? null,
       })),
-      aircraft: this.catalogProvider.listAircraftCards().map((card) => ({
+      aircraft: catalogAircraft.map((card) => ({
         card,
         owned: aircraftOwnership.has(card.aircraftType.icaoTypeCode),
         firstCollectedAtUtc: aircraftOwnership.get(card.aircraftType.icaoTypeCode) ?? null,
       })),
-      airlines: this.catalogProvider.listAirlineCards().map((card) => ({
+      airlines: catalogAirlines.map((card) => ({
         card,
         owned: airlineOwnership.has(card.airline.iataCode.toString()),
         firstCollectedAtUtc: airlineOwnership.get(card.airline.iataCode.toString()) ?? null,

@@ -4,7 +4,9 @@
  * already have this card"; identity is (userId, entityKey), enforced by a
  * database unique constraint (see infrastructure/persistence), not just an
  * application-level check, so concurrent unlock attempts can never race
- * into duplicates.
+ * into duplicates. `sourceLoggedFlightId` records which flight triggered
+ * the unlock (null for cards unlocked before this field existed, or by a
+ * future bulk-import path with no single triggering flight).
  */
 
 export class UserAirportCard {
@@ -13,6 +15,7 @@ export class UserAirportCard {
     readonly userId: string,
     readonly airportIataCode: string,
     readonly firstCollectedAtUtc: Date,
+    readonly sourceLoggedFlightId: string | null = null,
   ) {}
 }
 
@@ -22,6 +25,7 @@ export class UserAircraftCard {
     readonly userId: string,
     readonly aircraftTypeIcaoCode: string,
     readonly firstCollectedAtUtc: Date,
+    readonly sourceLoggedFlightId: string | null = null,
   ) {}
 }
 
@@ -31,5 +35,6 @@ export class UserAirlineCard {
     readonly userId: string,
     readonly airlineIataCode: string,
     readonly firstCollectedAtUtc: Date,
+    readonly sourceLoggedFlightId: string | null = null,
   ) {}
 }

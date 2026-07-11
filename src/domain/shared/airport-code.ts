@@ -1,13 +1,21 @@
 import { InvalidValueError } from "./errors";
 
-/** IATA code: exactly 3 uppercase letters. Used for both airports (e.g. "JFK") and airlines (e.g. "BA"). */
+/**
+ * IATA code, 2-3 characters. Used for both airports (e.g. "JFK" — always
+ * letters in practice) and airlines (e.g. "BA", but also legitimately
+ * alphanumeric like "9W" or "5J") — the character class allows digits so it
+ * doesn't reject real airline codes; airport-specific letters-only
+ * filtering happens where airport data is sourced (see
+ * infrastructure/seed/seed-reference-data.ts), not in this shared value
+ * object.
+ */
 export class IataCode {
   private constructor(readonly value: string) {}
 
   static create(raw: string): IataCode {
     const normalized = raw.trim().toUpperCase();
-    if (!/^[A-Z]{2,3}$/.test(normalized)) {
-      throw new InvalidValueError("IataCode", raw, "expected 2-3 uppercase letters");
+    if (!/^[A-Z0-9]{2,3}$/.test(normalized)) {
+      throw new InvalidValueError("IataCode", raw, "expected 2-3 alphanumeric characters");
     }
     return new IataCode(normalized);
   }
