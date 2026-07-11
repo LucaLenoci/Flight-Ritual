@@ -12,9 +12,12 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  createdAt     DateTime       @default(now())
+  id             String              @id @default(cuid())
+  createdAt      DateTime            @default(now())
   flightMemories FlightMemory[]
+  airportCards   UserAirportCard[]
+  aircraftCards  UserAircraftCard[]
+  airlineCards   UserAirlineCard[]
 }
 
 model Airport {
@@ -27,8 +30,9 @@ model Airport {
   longitude Float
   timeZone  String
 
-  originFlights      Flight[] @relation("OriginAirport")
-  destinationFlights Flight[] @relation("DestinationAirport")
+  originFlights      Flight[]          @relation("OriginAirport")
+  destinationFlights Flight[]          @relation("DestinationAirport")
+  userCards          UserAirportCard[]
 }
 
 model Airline {
@@ -36,6 +40,7 @@ model Airline {
   icaoCode String   @unique
   name     String
   flights  Flight[]
+  userCards UserAirlineCard[]
 }
 
 model AircraftType {
@@ -44,6 +49,7 @@ model AircraftType {
   model        String
   facts        String // JSON-encoded string[] of interesting facts
   aircraft     Aircraft[]
+  userCards    UserAircraftCard[]
 }
 
 model Aircraft {
@@ -127,5 +133,49 @@ model FlightMemory {
   note         String?
 
   @@unique([userId, flightId])
+  @@index([userId])
+}
+
+// Collectible Cards ownership. Each of these three junction tables is the
+// database-level source of truth for "does this user already own this
+// card" — the @@unique constraint is what guarantees no duplicate can ever
+// be created, even under concurrent unlock attempts for the same user and
+// entity (a safe create-and-catch-conflict upsert relies on this, not on
+// an application-level check, which could race). The reference entities
+// (Airport/AircraftType/Airline) are shared, not duplicated per user; only
+// firstCollectedAtUtc is per-user state here.
+model UserAirportCard {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id])
+  airportIataCode     String
+  airport             Airport  @relation(fields: [airportIataCode], references: [iataCode])
+  firstCollectedAtUtc DateTime @default(now())
+
+  @@unique([userId, airportIataCode])
+  @@index([userId])
+}
+
+model UserAircraftCard {
+  id                  String       @id @default(cuid())
+  userId              String
+  user                User         @relation(fields: [userId], references: [id])
+  aircraftTypeCode    String
+  aircraftType        AircraftType @relation(fields: [aircraftTypeCode], references: [icaoTypeCode])
+  firstCollectedAtUtc DateTime     @default(now())
+
+  @@unique([userId, aircraftTypeCode])
+  @@index([userId])
+}
+
+model UserAirlineCard {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id])
+  airlineIataCode     String
+  airline             Airline  @relation(fields: [airlineIataCode], references: [iataCode])
+  firstCollectedAtUtc DateTime @default(now())
+
+  @@unique([userId, airlineIataCode])
   @@index([userId])
 }

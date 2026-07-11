@@ -1,3 +1,4 @@
+import { AirplaneTilt } from "@phosphor-icons/react/dist/ssr";
 import { FlightCard, FlightCardData } from "../components/flight/flight-card";
 import { EmptyState } from "../components/ui/empty-state";
 import { getContainer } from "../infrastructure/composition-root";
@@ -32,18 +33,20 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <div className="mb-8">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-altitude-400">Live &amp; upcoming</p>
-        <h1 className="mt-2 font-display text-3xl text-mist-100 sm:text-4xl">Your journeys, in the air</h1>
-        <p className="mt-2 max-w-xl text-sm text-mist-400">
-          Track a flight to unlock its Aircraft Reveal, Golden Hour window, and Runway Moment — and save it
-          to your Flight Legacy once it lands.
+      {/* Sky gradient owns Home — the one hero background on this screen. Dark mode swaps to a deeper
+          navy-to-blue variant (never the light gradient), so the white text stays legible. */}
+      <div className="animate-rise-fade mb-8 rounded-3xl bg-gradient-sky-day px-6 py-10 dark:bg-gradient-sky-night sm:px-10">
+        <p className="font-mono text-xs uppercase tracking-eyebrow text-on-gradient/80">Live &amp; Upcoming</p>
+        <h1 className="mt-2 font-display text-3xl italic text-on-gradient sm:text-4xl">Your journeys, in the air</h1>
+        <p className="mt-2 max-w-xl text-sm text-on-gradient/90">
+          Track a flight to unlock its Aircraft Reveal, Golden Hour Window, and Runway Moment — and collect a
+          card for every airport, aircraft, and airline you fly.
         </p>
       </div>
 
       {flights.length === 0 ? (
         <EmptyState
-          icon="✈"
+          icon={<AirplaneTilt aria-hidden="true" />}
           title="No flights available right now"
           description="Check back shortly — new journeys appear here as they become trackable."
         />

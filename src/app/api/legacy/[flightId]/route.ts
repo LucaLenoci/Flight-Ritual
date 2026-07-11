@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getContainer } from "../../../../infrastructure/composition-root";
 import { checkRateLimit, clientKeyFrom } from "../../_lib/rate-limit";
-import { serializeFlightMemory } from "../../_lib/serializers";
+import { serializeCardUnlockResult, serializeFlightMemory } from "../../_lib/serializers";
 import { withSession } from "../../_lib/with-session";
 
 const RATE_LIMIT = 20;
@@ -27,9 +27,18 @@ export async function POST(request: NextRequest, context: { params: Promise<{ fl
     const rawBody = await request.text();
     const parsed = bodySchema.parse(rawBody ? JSON.parse(rawBody) : {});
 
-    const { recordCompletedFlight } = getContainer();
+    const { recordCompletedFlight, unlockCardsForFlight } = getContainer();
     const memory = await recordCompletedFlight.execute(userId, flightId, parsed.note ?? null);
 
-    return NextResponse.json({ memory: serializeFlightMemory(memory) }, { status: 201 });
+    // Card unlock evaluation runs as part of flight-completion processing.
+    // It's independently idempotent (DB unique constraint), so re-saving an
+    // already-saved flight is safe and simply yields zero new cards rather
+    // than re-firing the "new card" celebration.
+    const unlockResult = await unlockCardsForFlight.execute(userId, flightId);
+
+    return NextResponse.json(
+      { memory: serializeFlightMemory(memory), cardUnlocks: serializeCardUnlockResult(unlockResult) },
+      { status: 201 },
+    );
   });
 }

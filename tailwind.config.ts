@@ -1,63 +1,120 @@
-import type { Config } from "tailwindcss";
+// Aloft design system — Tailwind utilities are thin aliases over the CSS
+// custom properties defined in src/styles/tokens/*.css, so components can
+// use ordinary utility classes (bg-sky-500, text-rarity-legendary, ...)
+// while the actual values live in one place (the token files).
+//
+// Colors are stored as "R G B" triplets (see colors.css) and wrapped here
+// via withOpacity() into rgb(var(--x) / <alpha-value>) — the standard
+// Tailwind v3 pattern for CSS-variable-based colors that still need to
+// support opacity modifiers like bg-sky-500/15.
+function withOpacity(cssVariable: string) {
+  return ({ opacityValue }: { opacityValue?: string }) =>
+    opacityValue === undefined ? `rgb(var(${cssVariable}))` : `rgb(var(${cssVariable}) / ${opacityValue})`;
+}
 
-// Aviation-inspired design tokens: deep night-sky ink, runway gold accent,
-// altitude blue for data/trust, and a restrained neutral scale for chrome.
-const config: Config = {
+// Untyped: Tailwind's bundled Config type doesn't recognize the
+// function-value color form (withOpacity) even though Tailwind itself
+// supports and documents it at runtime.
+const config = {
+  darkMode: ["selector", '[data-theme="dark"]'],
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        ink: {
-          950: "#05070d",
-          900: "#0b0f1a",
-          800: "#121729",
-          700: "#1b2238",
-          600: "#2a3352",
+        sky: {
+          50: withOpacity("--color-sky-50"),
+          100: withOpacity("--color-sky-100"),
+          200: withOpacity("--color-sky-200"),
+          300: withOpacity("--color-sky-300"),
+          400: withOpacity("--color-sky-400"),
+          500: withOpacity("--color-sky-500"),
+          600: withOpacity("--color-sky-600"),
+          700: withOpacity("--color-sky-700"),
+          800: withOpacity("--color-sky-800"),
+          900: withOpacity("--color-sky-900"),
         },
-        altitude: {
-          400: "#7dd3ff",
-          500: "#3fa9f5",
-          600: "#1c7ed6",
+        amber: { 400: withOpacity("--color-amber-400"), 500: withOpacity("--color-amber-500") },
+        coral: { 400: withOpacity("--color-coral-400"), 500: withOpacity("--color-coral-500") },
+        dusk: { 400: withOpacity("--color-dusk-400"), 500: withOpacity("--color-dusk-500") },
+        rarity: {
+          common: withOpacity("--color-rarity-common"),
+          uncommon: withOpacity("--color-rarity-uncommon"),
+          rare: withOpacity("--color-rarity-rare"),
+          legendary: withOpacity("--color-rarity-legendary"),
         },
-        runway: {
-          400: "#f6c667",
-          500: "#e8a93a",
-          600: "#c98a1f",
+        paper: {
+          0: withOpacity("--color-paper-0"),
+          50: withOpacity("--color-paper-50"),
+          100: withOpacity("--color-paper-100"),
+          200: withOpacity("--color-paper-200"),
         },
-        mist: {
-          100: "#f5f7fb",
-          200: "#e4e8f1",
-          300: "#c7cede",
-          400: "#9aa4bd",
+        neutral: {
+          400: withOpacity("--color-neutral-400"),
+          600: withOpacity("--color-neutral-600"),
+          800: withOpacity("--color-neutral-800"),
+          900: withOpacity("--color-neutral-900"),
         },
-        signal: {
-          success: "#3ecf8e",
-          warning: "#f2b544",
-          danger: "#f0576b",
-        },
+        bg: withOpacity("--color-bg"),
+        surface: withOpacity("--color-surface"),
+        "surface-raised": withOpacity("--color-surface-raised"),
+        border: withOpacity("--color-border"),
+        "text-primary": withOpacity("--color-text-primary"),
+        "text-secondary": withOpacity("--color-text-secondary"),
+        "on-gradient": withOpacity("--color-text-on-gradient"),
+        success: withOpacity("--color-success"),
+        warning: withOpacity("--color-warning"),
+        danger: withOpacity("--color-danger"),
       },
       fontFamily: {
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
-        body: ["var(--font-body)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+        display: ["var(--font-display)"],
+        body: ["var(--font-body)"],
+        mono: ["var(--font-mono)"],
+      },
+      fontSize: {
+        xs: "var(--text-xs)",
+        sm: "var(--text-sm)",
+        base: "var(--text-base)",
+        lg: "var(--text-lg)",
+        xl: "var(--text-xl)",
+        "2xl": "var(--text-2xl)",
+        "3xl": "var(--text-3xl)",
+        "4xl": "var(--text-4xl)",
+      },
+      letterSpacing: {
+        eyebrow: "var(--tracking-eyebrow)",
+      },
+      borderRadius: {
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+        xl: "var(--radius-xl)",
+        "2xl": "var(--radius-2xl)",
+        "3xl": "var(--radius-3xl)",
+        card: "var(--radius-card)",
+        pill: "var(--radius-pill)",
+      },
+      aspectRatio: {
+        card: "2.5 / 3.5",
       },
       boxShadow: {
-        glow: "0 0 40px -8px rgba(63, 169, 245, 0.35)",
-        "runway-glow": "0 0 60px -10px rgba(232, 169, 58, 0.45)",
+        card: "var(--shadow-card)",
+        ui: "var(--shadow-ui)",
+        "glow-uncommon": "var(--glow-uncommon)",
+        "glow-rare": "var(--glow-rare)",
+        "glow-legendary": "var(--glow-legendary)",
       },
-      keyframes: {
-        "fade-in": {
-          "0%": { opacity: "0", transform: "translateY(6px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
+      backgroundImage: {
+        "gradient-golden-hour": "var(--gradient-golden-hour)",
+        "gradient-sky-day": "var(--gradient-sky-day)",
+        "gradient-sky-night": "var(--gradient-sky-night)",
       },
-      animation: {
-        "fade-in": "fade-in 0.4s ease-out",
-        shimmer: "shimmer 2.2s linear infinite",
+      transitionTimingFunction: {
+        spring: "var(--ease-spring)",
+        "out-soft": "var(--ease-out-soft)",
+        standard: "var(--ease-standard)",
+      },
+      transitionDuration: {
+        ui: "180ms",
       },
     },
   },

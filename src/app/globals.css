@@ -2,10 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
-}
+@import "../styles/styles.css";
 
 body {
-  @apply bg-ink-950 text-mist-100 antialiased;
+  @apply antialiased;
+  font-family: var(--font-body);
 }

@@ -1,0 +1,66 @@
+/**
+ * Aloft effects tokens: shadows, rarity glows, and motion. Easing curve
+ * *names* and their described behavior (spring-overshoot for reveals,
+ * soft-out for entrances, short standard transitions for ordinary UI) are
+ * as specified in the brief; the exact cubic-bezier/duration numbers are
+ * this implementation's authored interpretation.
+ */
+
+:root {
+  /* Shadows: warm-tinted (never pure black), soft, layered — a tight
+     low-opacity shadow plus a broader diffuse one. */
+  --shadow-card-tight: 0 1px 2px hsla(30, 45%, 15%, 0.14);
+  --shadow-card-diffuse: 0 16px 32px -8px hsla(30, 45%, 15%, 0.16);
+  --shadow-card: var(--shadow-card-tight), var(--shadow-card-diffuse);
+
+  --shadow-ui-tight: 0 1px 2px hsla(30, 40%, 15%, 0.08);
+  --shadow-ui-diffuse: 0 8px 20px -6px hsla(30, 40%, 15%, 0.1);
+  --shadow-ui: var(--shadow-ui-tight), var(--shadow-ui-diffuse);
+
+  /* Rarity glow — layered on top of the base card shadow, never replacing it */
+  --glow-uncommon: 0 0 20px -2px hsla(163, 60%, 45%, 0.35);
+  --glow-rare: 0 0 26px -2px hsla(262, 83%, 66%, 0.45);
+  --glow-legendary: 0 0 32px -2px hsla(43, 90%, 55%, 0.55);
+
+  /* Motion */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --duration-ui: 180ms;
+  --duration-ui-max: 280ms;
+  --duration-enter: 480ms;
+  --duration-reveal: 640ms;
+  --duration-foil-sweep: 3s;
+}
+
+@keyframes card-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) rotateY(-8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+}
+
+@keyframes rise-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes foil-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

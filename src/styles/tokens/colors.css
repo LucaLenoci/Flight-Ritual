@@ -1,0 +1,103 @@
+/**
+ * Aloft color tokens.
+ *
+ * NOTE: The design-system brief (prose) specified palette philosophy and
+ * rules but did not include literal hex/CSS token files. These concrete
+ * values are this implementation's authored interpretation, chosen to match
+ * the described intent (vivid aviation "sky" blue; golden-hour amber ->
+ * coral -> dusk-sky gradient; violet=rare / gold=legendary explicitly
+ * specified; common/uncommon hues inferred since none were given; dark mode
+ * as a vivid indigo-navy, hue ~260, never desaturated to gray). Reconcile
+ * against a real token file if one becomes available.
+ *
+ * Values are stored as space-separated "R G B" triplets (not hex) so
+ * Tailwind's opacity modifiers (e.g. bg-sky-500/15) work — Tailwind wraps
+ * these in rgb(var(--x) / <alpha-value>) (see tailwind.config.ts), which
+ * requires the raw channel numbers, not a hex string or gradient function.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Sky — primary brand hue, vivid aviation blue (tracking/live state) */
+  --color-sky-50: 234 244 255;
+  --color-sky-100: 210 231 255;
+  --color-sky-200: 166 207 255;
+  --color-sky-300: 121 180 255;
+  --color-sky-400: 76 150 255;
+  --color-sky-500: 47 125 255; /* primary */
+  --color-sky-600: 29 99 219;
+  --color-sky-700: 21 76 173;
+  --color-sky-800: 16 57 128;
+  --color-sky-900: 11 41 87;
+
+  /* Golden hour — amber -> coral -> dusk-sky, celebratory/reveal moments */
+  --color-amber-400: 255 194 87;
+  --color-amber-500: 255 178 56;
+  --color-coral-400: 255 138 101;
+  --color-coral-500: 255 122 89;
+  --color-dusk-400: 143 109 240;
+  --color-dusk-500: 108 77 230;
+  --gradient-golden-hour: linear-gradient(135deg, #ffd166 0%, #ff8a5b 48%, #7c5cff 100%);
+  --gradient-sky-day: linear-gradient(135deg, #eaf4ff 0%, #bfe0ff 55%, #79b4ff 100%);
+  --gradient-sky-night: linear-gradient(135deg, #1a2550 0%, #233a7a 55%, #2f5fc9 100%);
+
+  /* Rarity — instantly legible by color alone. Rare/legendary hues are
+     explicit in the brief; common/uncommon are this implementation's
+     interpretation (muted neutral / modest emerald respectively, so they
+     don't compete visually with rare/legendary). */
+  --color-rarity-common: 154 145 127;
+  --color-rarity-uncommon: 47 168 138;
+  --color-rarity-rare: 139 92 246;
+  --color-rarity-legendary: 212 160 23;
+  --color-rarity-legendary-foil: linear-gradient(115deg, #d4a017 0%, #ffe9a8 25%, #d4a017 50%, #ffe9a8 75%, #d4a017 100%);
+
+  /* Paper / neutral — warm-neutral surfaces, the "collectible album" mode */
+  --color-paper-0: 255 253 249;
+  --color-paper-50: 251 247 238;
+  --color-paper-100: 244 236 219;
+  --color-paper-200: 232 220 194;
+  --color-neutral-400: 164 156 138;
+  --color-neutral-600: 118 111 95;
+  --color-neutral-800: 68 63 52;
+  --color-neutral-900: 42 39 31;
+
+  /* Semantic surfaces/text (swap under [data-theme="dark"]) */
+  --color-bg: var(--color-paper-50);
+  --color-surface: var(--color-paper-0);
+  --color-surface-raised: 255 255 255;
+  --color-border: var(--color-paper-200);
+  --color-text-primary: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-on-gradient: 255 255 255;
+
+  /* Status (delay/error states, unrelated to rarity) */
+  --color-success: 31 157 107;
+  --color-warning: 217 122 31;
+  --color-danger: 224 68 107;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Indigo-navy, hue ~260 — never desaturated to pure gray */
+  --color-surface-dark-900: 15 12 33;
+  --color-surface-dark-800: 22 18 46;
+  --color-surface-dark-700: 33 27 66;
+  --color-surface-dark-600: 51 42 92;
+  --color-surface-dark-border: 58 48 102;
+
+  --color-bg: var(--color-surface-dark-900);
+  --color-surface: var(--color-surface-dark-800);
+  --color-surface-raised: var(--color-surface-dark-700);
+  --color-border: var(--color-surface-dark-border);
+  --color-text-primary: 245 241 255;
+  --color-text-secondary: 200 191 230;
+  --color-text-on-gradient: 255 255 255;
+
+  /* Rarity glows read *more* vividly in dark mode, not less */
+  --color-rarity-common: 182 173 153;
+  --color-rarity-uncommon: 62 203 163;
+  --color-rarity-rare: 163 123 255;
+  --color-rarity-legendary: 243 192 74;
+}

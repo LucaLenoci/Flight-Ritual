@@ -6,12 +6,16 @@ import type {
   Airport as PrismaAirport,
   Flight as PrismaFlight,
   JourneyEvent as PrismaJourneyEvent,
+  UserAircraftCard as PrismaUserAircraftCard,
+  UserAirlineCard as PrismaUserAirlineCard,
+  UserAirportCard as PrismaUserAirportCard,
 } from "@prisma/client";
 import { Aircraft } from "../../domain/aircraft/aircraft";
 import { AircraftAssignment, AssignmentConfidence, AssignmentSource } from "../../domain/aircraft/aircraft-assignment";
 import { AircraftType } from "../../domain/aircraft/aircraft-type";
 import { Airline } from "../../domain/airport/airline";
 import { Airport } from "../../domain/airport/airport";
+import { UserAircraftCard, UserAirlineCard, UserAirportCard } from "../../domain/cards/user-card-ownership";
 import { Flight } from "../../domain/flight/flight";
 import { FlightPhase } from "../../domain/flight/flight-phase";
 import { JourneyEvent, JourneyEventDetail, JourneyEventType } from "../../domain/flight/journey-event";
@@ -97,4 +101,16 @@ export function toDomainJourneyEvent(row: PrismaJourneyEvent): JourneyEvent {
     row.occurredAtUtc,
     JSON.parse(row.payload) as JourneyEventDetail,
   );
+}
+
+export function toDomainUserAirportCard(row: PrismaUserAirportCard): UserAirportCard {
+  return new UserAirportCard(row.id, row.userId, row.airportIataCode, row.firstCollectedAtUtc);
+}
+
+export function toDomainUserAircraftCard(row: PrismaUserAircraftCard): UserAircraftCard {
+  return new UserAircraftCard(row.id, row.userId, row.aircraftTypeCode, row.firstCollectedAtUtc);
+}
+
+export function toDomainUserAirlineCard(row: PrismaUserAirlineCard): UserAirlineCard {
+  return new UserAirlineCard(row.id, row.userId, row.airlineIataCode, row.firstCollectedAtUtc);
 }

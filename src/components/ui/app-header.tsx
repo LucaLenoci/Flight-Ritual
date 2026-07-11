@@ -1,28 +1,31 @@
+import { AirplaneTilt } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
+import { ThemeToggle } from "./theme-toggle";
 
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-ink-700/60 bg-ink-950/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 font-display text-lg tracking-tight text-mist-100">
-          <span aria-hidden="true" className="text-altitude-400">
-            ✈
-          </span>
-          Flight Ritual
+        <Link href="/" className="flex items-center gap-2 font-display text-lg italic text-text-primary">
+          <AirplaneTilt weight="fill" className="text-sky-500" aria-hidden="true" />
+          Aloft
         </Link>
         <nav aria-label="Primary" className="flex items-center gap-1">
           <Link
             href="/"
-            className="rounded-full px-3 py-1.5 text-sm text-mist-300 transition-colors hover:bg-ink-800 hover:text-mist-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-altitude-400"
+            className="rounded-pill px-3 py-1.5 text-sm text-text-secondary transition-all duration-ui ease-standard hover:bg-paper-100 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:hover:bg-surface-raised"
           >
-            Journeys
+            Tracker
           </Link>
           <Link
             href="/legacy"
-            className="rounded-full px-3 py-1.5 text-sm text-mist-300 transition-colors hover:bg-ink-800 hover:text-mist-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-altitude-400"
+            className="rounded-pill px-3 py-1.5 text-sm text-text-secondary transition-all duration-ui ease-standard hover:bg-paper-100 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:hover:bg-surface-raised"
           >
             My Flight Legacy
           </Link>
+          <div className="ml-2">
+            <ThemeToggle />
+          </div>
         </nav>
       </div>
     </header>

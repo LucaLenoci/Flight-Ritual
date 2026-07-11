@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { EnrichAircraftAssignmentUseCase } from "../application/aircraft-enrichment/enrich-aircraft-assignment";
+import { GetUserCardAlbumUseCase } from "../application/cards/get-user-card-album";
+import { UnlockCardsForFlightUseCase } from "../application/cards/unlock-cards-for-flight";
 import { RecommendWindowUseCase } from "../application/golden-hour-engine/recommend-window";
 import { TrackFlightUseCase } from "../application/journey-engine/track-flight";
 import { GetUserLegacyUseCase } from "../application/legacy-service/get-user-legacy";
@@ -7,7 +9,9 @@ import { RecordCompletedFlightUseCase } from "../application/legacy-service/reco
 import { SystemClock } from "../application/ports/clock";
 import { RunwayMomentService } from "../application/runway-moment/runway-moment-service";
 import { MockAircraftDataProvider } from "./providers/mock-aircraft-data-provider";
+import { MockCardCatalogProvider } from "./providers/mock-card-catalog-provider";
 import { MockFlightDataProvider } from "./providers/mock-flight-data-provider";
+import { PrismaCardRepository } from "./persistence/prisma-card-repository";
 import { PrismaFlightRepository } from "./persistence/prisma-flight-repository";
 import { PrismaLegacyRepository } from "./persistence/prisma-legacy-repository";
 import { prisma } from "./persistence/prisma-client";
@@ -28,8 +32,10 @@ function buildContainer() {
   const clock = new SystemClock();
   const flightDataProvider = new MockFlightDataProvider(clock);
   const aircraftDataProvider = new MockAircraftDataProvider(clock);
+  const cardCatalogProvider = new MockCardCatalogProvider();
   const flightRepository = new PrismaFlightRepository(prisma);
   const legacyRepository = new PrismaLegacyRepository(prisma);
+  const cardRepository = new PrismaCardRepository(prisma);
 
   return {
     clock,
@@ -40,6 +46,8 @@ function buildContainer() {
     runwayMoment: new RunwayMomentService(),
     recordCompletedFlight: new RecordCompletedFlightUseCase(flightRepository, legacyRepository, clock, randomUUID),
     getUserLegacy: new GetUserLegacyUseCase(legacyRepository),
+    unlockCardsForFlight: new UnlockCardsForFlightUseCase(cardRepository, flightRepository, clock),
+    getUserCardAlbum: new GetUserCardAlbumUseCase(cardRepository, cardCatalogProvider),
     flightRepository,
   };
 }

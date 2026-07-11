@@ -2,6 +2,8 @@
 // src/app/api/_lib/serializers.ts. Kept separate from the domain layer so
 // client components never import server-only code (Prisma, Node crypto, ...).
 
+export type CardRarityDto = "COMMON" | "UNCOMMON" | "RARE" | "LEGENDARY";
+
 export type FlightPhaseDto =
   | "SCHEDULED"
   | "BOARDING"
@@ -154,4 +156,49 @@ export interface LegacyDashboardResponse {
   memories: FlightMemoryDto[];
   collection: UserCollectionDto;
   stats: StatsSnapshotDto;
+}
+
+export interface AirportCardDto {
+  iataCode: string;
+  icaoCode: string;
+  city: string;
+  country: string;
+  rarity: CardRarityDto;
+}
+
+export interface AircraftCardDto {
+  icaoTypeCode: string;
+  manufacturer: string;
+  model: string;
+  engineType: string;
+  funFact: string;
+  rarity: CardRarityDto;
+}
+
+export interface AirlineCardDto {
+  iataCode: string;
+  icaoDesignator: string;
+  name: string;
+  country: string;
+  liveryColorHex: string;
+  funFact: string;
+  rarity: CardRarityDto;
+}
+
+export interface AlbumEntryDto<TCard> {
+  card: TCard;
+  owned: boolean;
+  firstCollectedAtUtc: string | null;
+}
+
+export interface CardAlbumResponse {
+  airports: AlbumEntryDto<AirportCardDto>[];
+  aircraft: AlbumEntryDto<AircraftCardDto>[];
+  airlines: AlbumEntryDto<AirlineCardDto>[];
+}
+
+export interface CardUnlockResultDto {
+  newAirportCards: AirportCardDto[];
+  newAircraftCards: AircraftCardDto[];
+  newAirlineCards: AirlineCardDto[];
 }
